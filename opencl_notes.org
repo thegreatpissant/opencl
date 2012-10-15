@@ -190,12 +190,10 @@ the same data type.
 | CL_DEVICE_TYPE_ACCELERATOR | External accelerator device  |
 |----------------------------+------------------------------|
 
+The following function will query for all specific devices on a
+platform.
+
 #+begin_src c
-  // query for number of all devices
-  clGetDeviceIDs (platform, CL_DEVICE_TYPE_ALL, 1, NULL, &num_devices);
-  
-  // get those devices
-  cl_device_id devices = (cl_device_id*) malloc (sizeof (cl_device_id)*num_devices);
-  clGetDeviceIDs (platform, CL_DEVICE_TYPE_ALL, num_devices, devices, NULL);
+
 #+end_src
 

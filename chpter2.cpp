@@ -39,11 +39,39 @@ int main (int argc, char ** argv)
   for (; i < num_platforms; ++i) {
     printf ("Platform #%d ", i);
     sb_clPrintPlatformInfo (platforms+i);
+    sb_clPrintPlatformDevices (platforms+i);
   }
 
+  //  Free the platforms and exit
+  free (devices);
   free (platforms);
   exit (0);
 }
+void sb_clPrintPlatformDevices ( cl_platform_id * platform )
+{
+  cl_uint num_devices;
+
+  //  Get CL_DEVICE_TYPE_ALL for the platform
+  clGetDeviceIDs (platform, CL_DEVICE_TYPE_ALL, 1, NULL, &num_devices);
+  printf ("ALL platform devices: %d\n", num_devices);
+
+  // Get  CL_DEVICE_TYPE_DEFAULT for the platform
+  clGetDeviceIDs (platform, CL_DEVICE_TYPE_DEFAULT, 1, NULL, &num_devices);
+  printf ("DEFAULT platform devices: %d\n", num_devices);
+
+  // Get  CL_DEVICE_TYPE_CPU for the platform
+  clGetDeviceIDs (platform,  CL_DEVICE_TYPE_CPU, 1, NULL, &num_devices);
+  printf ("CPU platform devices: %d\n", num_devices);
+
+  // Get  CL_DEVICE_TYPE_GPU for the platform
+  clGetDeviceIDs (platform,  CL_DEVICE_TYPE_GPU, 1, NULL, &num_devices);
+  printf ("GPU platform devices: %d\n", num_devices);
+
+  // Get  CL_DEVICE_TYPE_ACCELERATOR for the platform
+  clGetDeviceIDs (platform,  CL_DEVICE_TYPE_ACCELERATOR, 1, NULL, &num_devices);
+  printf ("ACCELERATOR platform devices: %d\n", num_devices);
+}
+
 void sb_clPrintPlatformInfo ( cl_platform_id * platform ) 
 {
   printf ("Platform Info\n");

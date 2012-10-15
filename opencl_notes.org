@@ -1,3 +1,4 @@
+#+OPTIONS: ^:{}
 
 James A. Feister, OpenCL Notebook
 
@@ -61,29 +62,30 @@ the same data type.
   implementation
 
   For example if you have a nvidia video card and intel cpu, you would
-  require two platforms, one to access the nvidia cuda video card platform
-  and one to access the intel smd 
+  require two platforms, one to access the nvidia cuda video card
+  platform and one to access the intel smd
 
-** Obtaining the platforms available
+** Obtaining available platforms
    Platforms are only available if you have the appropriate vendor SDK
    installed on your system.
    
-   Function def: cl_int clGetPlatformIDs (cl_uint num_entries, cl_platform_id *
-   platforms, cl_uint * num_platforms);
+   Function def: cl_int clGetPlatformIDs (cl_uint num_entries,
+   cl_platform_id * platforms, cl_uint * num_platforms);
 
    The clGetPlatformIDs function allows for you to query the number of
    available platforms.
 
 #+begin_src cpp
-  cl_int num_platforms;
-  clGetPlatformIDs (1, NULL, &num_platforms);
+  cl_int num_platforms; clGetPlatformIDs (1, NULL, &num_platforms);
 #+end_src
 
-   You then can use it to obtain handles to those platforms.
+   You then can use it to obtain handles to those platforms.  Which
+   allow you to query for information on them.
 
 #+begin_src cpp
-  cl_platform_id platforms = (platforms *) malloc ( sizeof (cl_platform_id) * num_platforms );
-  clGetPlatformIDs (num_platforms, platforms, NULL);
+  cl_platform_id platforms = (platforms *) malloc ( sizeof
+  (cl_platform_id) * num_platforms ); clGetPlatformIDs (num_platforms,
+  platforms, NULL);
 #+end_src
 
    You now have handles to all platforms available on your system.
@@ -92,4 +94,108 @@ the same data type.
 ** Obtaining platform information
    The following information about a platform may be queried.
 
-   
+   | Parameter name         | Purpose                                          |
+   |------------------------+--------------------------------------------------|
+   | CL_PLATFORM_NAME       | Name of the platform                             |
+   | CL_PLATFORM_VENDOR     | Vendor of the platform                           |
+   | CL_PLATFORM_VERSION    | Supported  OpenCL version                        |
+   | CL_PLATFORM_PROFILE    | FULL_PROFILE or EMBEDDED_PROFILE OpenCL Standard |
+   | CL_PLATFORM_EXTENSIONS | List of supported extensions                     |
+   |------------------------+--------------------------------------------------|
+
+   The function cl_int clGetPlatformInfo(cl_platform_id platform,
+    cl_platform_info param_name, size_t param_value_size, void
+    *param_value, size_t *param_value_size_ret) is used like the
+    clGetPlatformIDs funciton to query for this information.
+
+#+begin_src c
+  cl_int clGetPlatformInfo(cl_platform_id platform, cl_platform_info
+  param_name, size_t param_value_size, void *param_value, size_t
+  *param_value_size_ret)
+#+end_src
+
+    The following user created support functions will query for all
+    platforms parameter values. Pass the platform to
+    sb_clPrintPlatformInfo to print all platform values.
+
+#+begin_src c
+  void sb_clPrintPlatformInfo ( cl_platform_id * platform ) 
+  {
+    printf ("Platform Info\n");
+  
+    printf ("\tName: ");
+    sb_clPrintPlatformExtension ( platform, CL_PLATFORM_NAME );
+    printf ("\n");
+  
+    printf ("\tVendor: ");
+    sb_clPrintPlatformExtension (  platform, CL_PLATFORM_VENDOR );
+    printf ("\n");
+  
+    printf ("\tVersion: ");
+    sb_clPrintPlatformExtension (  platform, CL_PLATFORM_VERSION );
+    printf ("\n");
+  
+    printf ("\tProfile: ");
+    sb_clPrintPlatformExtension (  platform, CL_PLATFORM_PROFILE );
+    printf ("\n");
+  
+    printf ("\tExtensions: ");
+    sb_clPrintPlatformExtension (  platform, CL_PLATFORM_EXTENSIONS );
+    printf ("\n");
+  }
+  
+  void sb_clPrintPlatformExtension ( cl_platform_id * platform, cl_int extension ) 
+  {
+    cl_char * ext_data;
+    size_t param_size;
+    cl_int ret;
+  
+    ret = clGetPlatformInfo (*platform, extension, 0, NULL, &param_size);
+    if ( ret < 0 ) {
+      perror ("Couldn't read extension data.");
+      exit (EXIT_FAILURE);
+    }
+    ext_data = (cl_char*)malloc(param_size+1);
+    ext_data[param_size] = '\0';
+    ret = clGetPlatformInfo (*platform, extension, param_size, ext_data, NULL);
+    printf ("%s", ext_data);
+    free (ext_data);
+  }
+#+end_src
+
+  
+** Obtaining Devices
+   Devices associated with a specific platform can be queried by the
+   following function.
+
+#+begin_src c
+  cl_int clGetDeviceIDs(cl_platform_id platform,
+      cl_device_type device_type, cl_uint num_entries,
+      cl_device_id *devices, cl_uint *num_devices)
+#+end_src
+
+  Just like the you did with the clGetPlatformIDs function you query a
+  platform for the number of devices available of a specific
+  type. Then allocate and request device types for that number of
+  devices specified.
+
+  The available devices to query for are in the following table.
+
+| Device type                | Description                  |
+|----------------------------+------------------------------|
+| CL_DEVICE_TYPE_ALL         | All platform devices         |
+| CL_DEVICE_TYPE_DEFAULT     | All platform default devices |
+| CL_DEVICE_TYPE_CPU         | Host processor               |
+| CL_DEVICE_TYPE_GPU         | Device containg a GPU        |
+| CL_DEVICE_TYPE_ACCELERATOR | External accelerator device  |
+|----------------------------+------------------------------|
+
+#+begin_src c
+  // query for number of all devices
+  clGetDeviceIDs (platform, CL_DEVICE_TYPE_ALL, 1, NULL, &num_devices);
+  
+  // get those devices
+  cl_device_id devices = (cl_device_id*) malloc (sizeof (cl_device_id)*num_devices);
+  clGetDeviceIDs (platform, CL_DEVICE_TYPE_ALL, num_devices, devices, NULL);
+#+end_src
+

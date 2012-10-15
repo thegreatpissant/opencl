@@ -1,0 +1,95 @@
+
+James A. Feister, OpenCL Notebook
+
+* Intro
+  This is my notebook for OpenCL.  It conatins a collection of notes
+  from various resources.  Some of these are taken verbatium from the
+  texts so this should not be taken as my own work.
+
+  References include:
+  - OpenCL in action: How to Accelerate Graphics and Computation
+
+* About OpenCL
+  OpenCL allows for utilizing different VECTOR proccessing units while
+  remaining manufacture agnostic.  You can use intel, amd, nvidia, or
+  other hardware vector processing capabilities without having to know
+  their specific implementations.
+
+  Typical applications of vector processing for the purpose of OpenCL
+  are broken into one of 3 catagories.
+  - Physical or Geometric: Vectors that represent Magnitude and
+Direction
+  - Mathematical vector: Ordered one dimensional collection of
+    elements
+  - Computational: Data structure that conatins multiple elements of
+the same data type.
+* Data Structures
+  There are six basic data structures of OpenCL
+  1) Platfoms: Identifies a Vendors implementation
+  2) Devices
+     
+  3) Contexts
+
+  4) Programs
+
+  5) Kernels
+
+  6) Command Queus
+     
+* Primitive Data Types
+
+  Found in CL/cl_platform.h
+
+  | Scalar Data Type | Bit Width | Purpose                               |
+  |------------------+-----------+---------------------------------------|
+  | cl_char          |         8 | Signed two's Complement integer       |
+  | cl_uchar         |         8 | unSigned two's complement integer     |
+  | cl_short         |        16 | Signed two's Complement integer       |
+  | cl_ushort        |        16 | unSigned two's Complement integer     |
+  | cl_int           |        32 | Signed two's Complement integer       |
+  | cl_uint          |        32 | unSigned two's Complement integer     |
+  | cl_long          |        64 | Signed two's Complement integer       |
+  | cl_ulong         |        64 | unSigned two's Complement integer     |
+  | cl_half          |        16 | Half presicision floating point value |
+  | cl_float         |        32 | Single precision floating point value |
+  | cl_double        |        64 | Double precision floating point value |
+  |------------------+-----------+---------------------------------------|
+  
+* Platform Data Structure
+
+  type: cl_platform_id - represents a platform of a OpenCL
+  implementation
+
+  For example if you have a nvidia video card and intel cpu, you would
+  require two platforms, one to access the nvidia cuda video card platform
+  and one to access the intel smd 
+
+** Obtaining the platforms available
+   Platforms are only available if you have the appropriate vendor SDK
+   installed on your system.
+   
+   Function def: cl_int clGetPlatformIDs (cl_uint num_entries, cl_platform_id *
+   platforms, cl_uint * num_platforms);
+
+   The clGetPlatformIDs function allows for you to query the number of
+   available platforms.
+
+#+begin_src cpp
+  cl_int num_platforms;
+  clGetPlatformIDs (1, NULL, &num_platforms);
+#+end_src
+
+   You then can use it to obtain handles to those platforms.
+
+#+begin_src cpp
+  cl_platform_id platforms = (platforms *) malloc ( sizeof (cl_platform_id) * num_platforms );
+  clGetPlatformIDs (num_platforms, platforms, NULL);
+#+end_src
+
+   You now have handles to all platforms available on your system.
+
+   
+** Obtaining platform information
+   The following information about a platform may be queried.
+
+   

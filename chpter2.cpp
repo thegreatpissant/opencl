@@ -35,13 +35,12 @@ int main (int argc, char ** argv)
   }
   printf ("num_platforms: %d\n", num_platforms);
   
-  /*
   cl_uint i = 0;
   for (; i < num_platforms; ++i) {
     printf ("Platform #%d ", i);
     sb_clPrintPlatformInfo (platforms+i);
   }
-  */
+
   free (platforms);
   exit (0);
 }

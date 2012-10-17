@@ -4,6 +4,7 @@
 #include <opencl-utils/include/CL/cl.h>
 #include <opencl-utils/include/clrun.h>
 void sb_clPrintPlatformDevices ( cl_platform_id * platform );
+void sb_clPrintPlatformDeviceInfo ( cl_device_id * device );
 void sb_clPrintPlatformInfo ( cl_platform_id * extension);
 void sb_clPrintPlatformExtension ( cl_platform_id * platform, cl_int extension );
 
@@ -48,11 +49,8 @@ int main (int argc, char ** argv)
 }
 void sb_clPrintPlatformDevices ( cl_platform_id * platform )
 {
-  cl_uint num_devices;
-
-  //  Get CL_DEVICE_TYPE_ALL for the platform
-  clGetDeviceIDs (*platform, CL_DEVICE_TYPE_ALL, 1, NULL, &num_devices);
-  printf ("ALL platform devices: %d\n", num_devices);
+  cl_uint num_devices = 0;
+  cl_device_id * devices;
 
   // Get  CL_DEVICE_TYPE_DEFAULT for the platform
   clGetDeviceIDs (*platform, CL_DEVICE_TYPE_DEFAULT, 1, NULL, &num_devices);
@@ -69,8 +67,74 @@ void sb_clPrintPlatformDevices ( cl_platform_id * platform )
   // Get  CL_DEVICE_TYPE_ACCELERATOR for the platform
   clGetDeviceIDs (*platform,  CL_DEVICE_TYPE_ACCELERATOR, 1, NULL, &num_devices);
   printf ("ACCELERATOR platform devices: %d\n", num_devices);
+
+  //  Get CL_DEVICE_TYPE_ALL for the platform
+  clGetDeviceIDs (*platform, CL_DEVICE_TYPE_ALL, 1, NULL, &num_devices);
+  printf ("ALL platform devices: %d\n", num_devices);
+  if (num_devices > 0)
+    {
+      devices = (cl_device_id*)malloc (sizeof (cl_device_id) * num_devices);
+      clGetDeviceIDs (*platform, CL_DEVICE_TYPE_ALL, num_devices, devices, NULL);
+      int i = 0;
+      for (; i < num_devices; ++i) {
+	printf ("Device #%d ", i);
+	sb_clPrintPlatformDeviceInfo (devices+i);
+      }
+    }
 }
 
+void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
+{
+  /*
+    CL_DEVICE_NAME               | char[]
+    CL_DEVICE_VENDOR             | char[]
+    CL_DEVICE_EXTENSIONS         | char[]
+    CL_DEVICE_GLOBAL_MEM_SIZE    | cl_ulong
+    CL_DEVICE_ADDRESS_BITS       | cl_uint
+    CL_DEVICE_AVAILABLE          | cl_bool
+    CL_DEVICE_COMPILER_AVAILABLE | cl_bool
+  */
+
+  size_t   qstring_len = 2048;
+  cl_ulong qmemory_size = 0;
+  cl_uint  qaddress_space = 0;
+  cl_bool  qdevice_available = false;
+  cl_bool  qdevice_compiler  = false;
+  cl_char * qstring = (cl_char *) malloc (qstring_len+1);
+
+  qstring[qstring_len] = '\0';
+
+  clGetDeviceInfo ( *device, CL_DEVICE_NAME, qstring_len, qstring, NULL);
+  printf ("Vendor Device Name: %s\n", qstring);
+
+  clGetDeviceInfo ( *device, CL_DEVICE_VENDOR, qstring_len, qstring, NULL);
+  printf ("Vendor Name: %s\n", qstring);
+
+  clGetDeviceInfo ( *device, CL_DEVICE_EXTENSIONS, qstring_len, qstring, NULL);
+  printf ("Device Extensions: %s\n", qstring);
+
+  clGetDeviceInfo ( *device, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof (cl_ulong), &qmemory_size, NULL);
+  printf ("Device Address Space Size: %d\n", qmemory_size);
+
+  clGetDeviceInfo ( *device, CL_DEVICE_ADDRESS_BITS, sizeof (cl_uint), &qaddress_space, NULL);
+  printf ("Device Address Bits: %d\n", qaddress_space);
+
+  clGetDeviceInfo ( *device, CL_DEVICE_AVAILABLE, sizeof (cl_bool), &qdevice_available, NULL);
+  printf ("Device Available: %s\n", qdevice_available ? "true":"false");
+
+  clGetDeviceInfo ( *device, CL_DEVICE_COMPILER_AVAILABLE, sizeof (cl_bool), &qdevice_compiler, NULL);
+  printf ("Device Compiler: %s\n", qdevice_compiler ? "true":"false");
+
+  //  clGetDeviceInfo ( *device, CL_DEVICE_NAME, name_length, name, NULL);
+  //  printf ("Device name: %s\n", name);
+
+  /* 
+     cl_int clGetDeviceInfo (cl_device_id device, cl_device_info
+     param_name, size_t param_value_size, void *param_value, size_t
+     *param_value_size_ret);
+  */
+
+}
 void sb_clPrintPlatformInfo ( cl_platform_id * platform ) 
 {
   printf ("Platform Info\n");

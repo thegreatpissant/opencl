@@ -6,41 +6,41 @@ James A. Feister, OpenCL Notebook
   This is my notebook for OpenCL.  It conatins a collection of notes
   from various resources.  Some of these are taken verbatium from the
   texts so this should not be taken as my own work.
-
+  
   References include:
   - OpenCL in action: How to Accelerate Graphics and Computation
-
+    
 * About OpenCL
   OpenCL allows for utilizing different VECTOR proccessing units while
   remaining manufacture agnostic.  You can use intel, amd, nvidia, or
   other hardware vector processing capabilities without having to know
   their specific implementations.
-
+  
   Typical applications of vector processing for the purpose of OpenCL
   are broken into one of 3 catagories.
   - Physical or Geometric: Vectors that represent Magnitude and
-Direction
+  Direction
   - Mathematical vector: Ordered one dimensional collection of
     elements
   - Computational: Data structure that conatins multiple elements of
-the same data type.
+  the same data type.
 * Data Structures
   There are six basic data structures of OpenCL
   1) Platfoms: Identifies a Vendors implementation
   2) Devices
      
   3) Contexts
-
+     
   4) Programs
-
+     
   5) Kernels
-
+     
   6) Command Queus
      
 * Primitive Data Types
-
+  
   Found in CL/cl_platform.h
-
+  
   | Scalar Data Type | Bit Width | Purpose                               |
   |------------------+-----------+---------------------------------------|
   | cl_char          |         8 | Signed two's Complement integer       |
@@ -57,10 +57,10 @@ the same data type.
   |------------------+-----------+---------------------------------------|
   
 * Platform Data Structure
-
+  
   type: cl_platform_id - represents a platform of a OpenCL
   implementation
-
+  
   For example if you have a nvidia video card and intel cpu, you would
   require two platforms, one to access the nvidia cuda video card
   platform and one to access the intel smd
@@ -71,29 +71,29 @@ the same data type.
    
    Function def: cl_int clGetPlatformIDs (cl_uint num_entries,
    cl_platform_id * platforms, cl_uint * num_platforms);
-
+   
    The clGetPlatformIDs function allows for you to query the number of
    available platforms.
-
-#+begin_src cpp
+   
+   #+begin_src cpp
   cl_int num_platforms; clGetPlatformIDs (1, NULL, &num_platforms);
-#+end_src
-
+   #+end_src
+   
    You then can use it to obtain handles to those platforms.  Which
    allow you to query for information on them.
-
-#+begin_src cpp
+   
+   #+begin_src cpp
   cl_platform_id platforms = (platforms *) malloc ( sizeof
   (cl_platform_id) * num_platforms ); clGetPlatformIDs (num_platforms,
   platforms, NULL);
-#+end_src
-
+   #+end_src
+   
    You now have handles to all platforms available on your system.
-
+   
    
 ** Obtaining platform information
    The following information about a platform may be queried.
-
+   
    | Parameter name         | Purpose                                          |
    |------------------------+--------------------------------------------------|
    | CL_PLATFORM_NAME       | Name of the platform                             |
@@ -102,23 +102,21 @@ the same data type.
    | CL_PLATFORM_PROFILE    | FULL_PROFILE or EMBEDDED_PROFILE OpenCL Standard |
    | CL_PLATFORM_EXTENSIONS | List of supported extensions                     |
    |------------------------+--------------------------------------------------|
-
-   The function cl_int clGetPlatformInfo(cl_platform_id platform,
-    cl_platform_info param_name, size_t param_value_size, void
-    *param_value, size_t *param_value_size_ret) is used like the
-    clGetPlatformIDs funciton to query for this information.
-
-#+begin_src c
+   
+   The function clGetPlatformInfo function is used to query for this
+   information.
+   
+   #+begin_src c
   cl_int clGetPlatformInfo(cl_platform_id platform, cl_platform_info
   param_name, size_t param_value_size, void *param_value, size_t
   *param_value_size_ret)
-#+end_src
-
-    The following user created support functions will query for all
-    platforms parameter values. Pass the platform to
-    sb_clPrintPlatformInfo to print all platform values.
-
-#+begin_src c
+   #+end_src
+   
+   The following user created support functions will query for all
+   platforms parameter values. Pass the platform to
+   sb_clPrintPlatformInfo to print all platform values.
+   
+   #+begin_src c
   void sb_clPrintPlatformInfo ( cl_platform_id * platform ) 
   {
     printf ("Platform Info\n");
@@ -161,39 +159,139 @@ the same data type.
     printf ("%s", ext_data);
     free (ext_data);
   }
-#+end_src
-
-  
+   #+end_src
+   
+   
 ** Obtaining Devices
    Devices associated with a specific platform can be queried by the
    following function.
-
-#+begin_src c
+   
+   #+begin_src c
   cl_int clGetDeviceIDs(cl_platform_id platform,
       cl_device_type device_type, cl_uint num_entries,
       cl_device_id *devices, cl_uint *num_devices)
-#+end_src
+   #+end_src
+   
+   Just like the you did with the clGetPlatformIDs function you query a
+   platform for the number of devices available of a specific
+   type. Then allocate and request device types for that number of
+   devices specified.
+   
+   The available devices to query for are in the following table.
+   
+   | Device type                | Description                  |
+   |----------------------------+------------------------------|
+   | CL_DEVICE_TYPE_ALL         | All platform devices         |
+   | CL_DEVICE_TYPE_DEFAULT     | All platform default devices |
+   | CL_DEVICE_TYPE_CPU         | Host processor               |
+   | CL_DEVICE_TYPE_GPU         | Device containg a GPU        |
+   | CL_DEVICE_TYPE_ACCELERATOR | External accelerator device  |
+   |----------------------------+------------------------------|
+   
+   The following function demonstrates the query for all specific devices on a
+   platform.
+   
+   #+begin_src c
+void sb_clPrintPlatformDevices ( cl_platform_id * platform )
+{
+  cl_uint num_devices;
 
-  Just like the you did with the clGetPlatformIDs function you query a
-  platform for the number of devices available of a specific
-  type. Then allocate and request device types for that number of
-  devices specified.
+  //  Get CL_DEVICE_TYPE_ALL for the platform
+  clGetDeviceIDs (*platform, CL_DEVICE_TYPE_ALL, 1, NULL, &num_devices);
+  printf ("ALL platform devices: %d\n", num_devices);
 
-  The available devices to query for are in the following table.
+  // Get  CL_DEVICE_TYPE_DEFAULT for the platform
+  clGetDeviceIDs (*platform, CL_DEVICE_TYPE_DEFAULT, 1, NULL, &num_devices);
+  printf ("DEFAULT platform devices: %d\n", num_devices);
 
-| Device type                | Description                  |
-|----------------------------+------------------------------|
-| CL_DEVICE_TYPE_ALL         | All platform devices         |
-| CL_DEVICE_TYPE_DEFAULT     | All platform default devices |
-| CL_DEVICE_TYPE_CPU         | Host processor               |
-| CL_DEVICE_TYPE_GPU         | Device containg a GPU        |
-| CL_DEVICE_TYPE_ACCELERATOR | External accelerator device  |
-|----------------------------+------------------------------|
+  // Get  CL_DEVICE_TYPE_CPU for the platform
+  clGetDeviceIDs (*platform,  CL_DEVICE_TYPE_CPU, 1, NULL, &num_devices);
+  printf ("CPU platform devices: %d\n", num_devices);
 
-The following function will query for all specific devices on a
-platform.
+  // Get  CL_DEVICE_TYPE_GPU for the platform
+  clGetDeviceIDs (*platform,  CL_DEVICE_TYPE_GPU, 1, NULL, &num_devices);
+  printf ("GPU platform devices: %d\n", num_devices);
 
-#+begin_src c
+  // Get  CL_DEVICE_TYPE_ACCELERATOR for the platform
+  clGetDeviceIDs (*platform,  CL_DEVICE_TYPE_ACCELERATOR, 1, NULL, &num_devices);
+  printf ("ACCELERATOR platform devices: %d\n", num_devices);
+}
+   #+end_src
+   
+** TODO Obtaining Device Info
+   This function does not work as the last, it seems to not return
+   the size of the data structure to allocate against it.  Will
+   revisit in the future to resolve the shortcuts in this function.
+   
+   Just as with the platforms you can query devices for their information
+   as well.  The following table list the available fields for query.
+   
+   | Parameter name               | Output Type | Purpose                                     |
+   |------------------------------+-------------+---------------------------------------------|
+   | CL_DEVICE_NAME               | char[]      | Name of device                              |
+   | CL_DEVICE_VENDOR             | char[]      | Device vendor                               |
+   | CL_DEVICE_EXTENSIONS         | char[]      | Supported OpenCL extensions                 |
+   | CL_DEVICE_GLOBAL_MEM_SIZE    | cl_ulong    | Size of devices global memory               |
+   | CL_DEVICE_ADDRESS_BITS       | cl_uint     | Size of devices address space               |
+   | CL_DEVICE_AVAILABLE          | cl_bool     | Is the device available                     |
+   | CL_DEVICE_COMPILER_AVAILABLE | cl_bool     | Does the implementation provide a compiler? |
+   |------------------------------+-------------+---------------------------------------------|
+   
+   The clGetDeviceInfo is used to query for device information
+   
+   #+begin_src c
+  cl_int clGetDeviceInfo (cl_device_id device, cl_device_info
+  param_name, size_t param_value_size, void *param_value, size_t
+  *param_value_size_ret);
+   #+end_src
+   
+   This is a helper function to do the query for these parameters.
+   
+   #+BEGIN_SRC c
+void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
+{
 
-#+end_src
+  size_t   qstring_len = 2048;
+  cl_ulong qmemory_size = 0;
+  cl_uint  qaddress_space = 0;
+  cl_bool  qdevice_available = false;
+  cl_bool  qdevice_compiler  = false;
+  cl_char * qstring = (cl_char *) malloc (qstring_len+1);
 
+  qstring[qstring_len] = '\0';
+
+  clGetDeviceInfo ( *device, CL_DEVICE_NAME, qstring_len, qstring, NULL);
+  printf ("Vendor Device Name: %s\n", qstring);
+
+  clGetDeviceInfo ( *device, CL_DEVICE_VENDOR, qstring_len, qstring, NULL);
+  printf ("Vendor Name: %s\n", qstring);
+
+  clGetDeviceInfo ( *device, CL_DEVICE_EXTENSIONS, qstring_len, qstring, NULL);
+  printf ("Device Extensions: %s\n", qstring);
+
+  clGetDeviceInfo ( *device, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof (cl_ulong), &qmemory_size, NULL);
+  printf ("Device Address Space Size: %d\n", qmemory_size);
+
+  clGetDeviceInfo ( *device, CL_DEVICE_ADDRESS_BITS, sizeof (cl_uint), &qaddress_space, NULL);
+  printf ("Device Address Bits: %d\n", qaddress_space);
+
+  clGetDeviceInfo ( *device, CL_DEVICE_AVAILABLE, sizeof (cl_bool), &qdevice_available, NULL);
+  printf ("Device Available: %s\n", qdevice_available ? "true":"false");
+
+  clGetDeviceInfo ( *device, CL_DEVICE_COMPILER_AVAILABLE, sizeof (cl_bool), &qdevice_compiler, NULL);
+  printf ("Device Compiler: %s\n", qdevice_compiler ? "true":"false");
+}
+   #+END_SRC
+   
+   There are plenty more things to query for as per the standard.
+   http://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/clGetDeviceInfo.html
+
+* Contexts
+  Contexts are created to manage devices from the same platform
+  selected to work together.  You use the context to create command
+  queues for sending kernels to devices.
+
+  An application may use multiple contexts to utilize multiple
+  platforms for all devices of each platform.
+
+** Creating contexts

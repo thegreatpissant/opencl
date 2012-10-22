@@ -3,6 +3,7 @@
 
 #include <opencl-utils/include/CL/cl.h>
 #include <opencl-utils/include/clrun.h>
+void sb_clPrintContextInfo ( cl_context * context );
 void sb_clPrintPlatformDevices ( cl_platform_id * platform );
 void sb_clPrintPlatformDeviceInfo ( cl_device_id * device );
 void sb_clPrintPlatformInfo ( cl_platform_id * extension);
@@ -14,7 +15,7 @@ int main (int argc, char ** argv)
   cl_int ret;
 
   if (( ret = clrInit() ))
-    printf ("ERROR: %d\n", ret);
+    perror ("ERROR: Initializing OpenCL\n");
   printf ("Success! OpenCL %s\n", clrHasOpenCL() ? "exists!" : "does not exist. ");
 
 
@@ -23,7 +24,7 @@ int main (int argc, char ** argv)
   cl_uint num_platforms;
 
   if ( clGetPlatformIDs (1, NULL, &num_platforms) < 0 ) {
-    printf ("Error getting number of platforms\n");
+    perror ("Error getting number of platforms\n");
     exit (EXIT_FAILURE);
   }
   
@@ -31,7 +32,7 @@ int main (int argc, char ** argv)
   platforms = (cl_platform_id *) malloc (sizeof (cl_platform_id) * num_entries);
   
   if ( clGetPlatformIDs (num_entries, platforms, NULL) < 0 ) {
-    printf ("Error getting platforms\n");
+    perror ("Error getting platforms\n");
     exit (EXIT_FAILURE);
   }
   printf ("num_platforms: %d\n", num_platforms);
@@ -42,6 +43,26 @@ int main (int argc, char ** argv)
     sb_clPrintPlatformInfo (platforms+i);
     sb_clPrintPlatformDevices (platforms+i);
   }
+
+  //  Query for a context and print its information
+  cl_int context_error;
+  cl_context qcontext;
+  cl_device_id * devices;
+  cl_uint num_devices = 0;
+  clGetDeviceIDs (*platforms, CL_DEVICE_TYPE_GPU, 1, NULL, &num_devices);
+  devices = (cl_device_id *) malloc (sizeof (cl_device_id) *num_devices);
+  clGetDeviceIDs (*platforms, CL_DEVICE_TYPE_GPU, num_devices, devices, NULL);
+  qcontext = clCreateContext (NULL, 1, devices, NULL, NULL, &context_error);
+  if (context_error < 0) {
+    perror ("Error getting context\n");
+    exit (EXIT_FAILURE);
+  }
+  sb_clPrintContextInfo (&qcontext);
+  clRetainContext (qcontext);
+  sb_clPrintContextInfo (&qcontext);
+  clReleaseContext (qcontext);
+  sb_clPrintContextInfo (&qcontext);
+  clReleaseContext (qcontext);
 
   //  Free the platforms and exit
   free (platforms);
@@ -81,6 +102,40 @@ void sb_clPrintPlatformDevices ( cl_platform_id * platform )
 	sb_clPrintPlatformDeviceInfo (devices+i);
       }
     }
+}
+
+void sb_clPrintContextInfo ( cl_context * context )
+{
+  cl_uint num_devices;
+  cl_uint ref_count;
+  cl_bool d3d_resource;
+  cl_int cerror;
+
+  /*  This was added in the 1.1 version
+  cerror =  clGetContextInfo (*context, CL_CONTEXT_NUM_DEVICES, sizeof (cl_uint), &num_devices, NULL);
+  if (cerror < 0) {
+    perror ("Error getting context CL_CONTEXT_NUM_DEVICES info\n");
+    exit (EXIT_FAILURE);
+  }
+  printf ("Context number of devices: %d\n", num_devices);
+
+  */
+  cerror = clGetContextInfo (*context, CL_CONTEXT_REFERENCE_COUNT, sizeof (cl_uint), &ref_count, NULL);
+  if (cerror < 0) {
+    perror ("Error getting context CL_CONTEXT_REFERENCE_COUNT info\n");
+    exit (EXIT_FAILURE);
+  }
+  printf ("Context reference count: %d\n", ref_count);
+
+  /*  This was added in the 1.1 version
+  cerror = clGetContextInfo (*context, CL_CONTEXT_D3D10_PREFER_SHARED_RESOURCES_KHR, sizeof (cl_bool), &d3d_resource, NULL);
+  if (cerror < 0) {
+    perror ("Error getting context CL_CONTEXT_D3D10_PREFER_SHARED_RESOURCES_KHR info\n");
+    exit (EXIT_FAILURE);
+  }
+  printf ("Context d3d exchange: %s\n", d3d_resource ? "true":"false");
+  */
+
 }
 
 void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )

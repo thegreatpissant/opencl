@@ -3,30 +3,33 @@
 James A. Feister, OpenCL Notebook
 
 * Intro
-  This is my notebook for OpenCL.  It conatins a collection of notes
-  from various resources.  Some of these are taken verbatium from the
+  This is my notebook for OpenCL.  It contains a collection of notes
+  from various resources.  Some of these are taken verbatim from the
   texts so this should not be taken as my own work.
   
   References include:
-  - OpenCL in action: How to Accelerate Graphics and Computation
+  - OpenCL in action[fn:1]: How to Accelerate Graphics and Computation
+  - OpenCL 1.0 Reference Pages [fn:2]
     
 * About OpenCL
-  OpenCL allows for utilizing different VECTOR proccessing units while
-  remaining manufacture agnostic.  You can use intel, amd, nvidia, or
+  OpenCL allows for utilizing different VECTOR processing units while
+  remaining manufacture agnostic.  You can use Intel, AMD, NVIDIA, or
   other hardware vector processing capabilities without having to know
   their specific implementations.
   
   Typical applications of vector processing for the purpose of OpenCL
-  are broken into one of 3 catagories.
+  are broken into one of 3 categories.
   - Physical or Geometric: Vectors that represent Magnitude and
   Direction
   - Mathematical vector: Ordered one dimensional collection of
     elements
-  - Computational: Data structure that conatins multiple elements of
+  - Computational: Data structure that contains multiple elements of
   the same data type.
 * Data Structures
   There are six basic data structures of OpenCL
-  1) Platfoms: Identifies a Vendors implementation
+
+  1) Platforms: Identifies a Vendors implementation
+
   2) Devices
      
   3) Contexts
@@ -35,12 +38,14 @@ James A. Feister, OpenCL Notebook
      
   5) Kernels
      
-  6) Command Queus
+  6) Command Queues
      
 * Primitive Data Types
   
-  Found in CL/cl_platform.h
-  
+  Table \ref{table:1} shows a list of all primitive OpenCL data types found in CL/cl_platform.h
+
+#+CAPTION: OpenCL Primitive Data types
+#+LABEL: table:1  
   | Scalar Data Type | Bit Width | Purpose                               |
   |------------------+-----------+---------------------------------------|
   | cl_char          |         8 | Signed two's Complement integer       |
@@ -51,7 +56,7 @@ James A. Feister, OpenCL Notebook
   | cl_uint          |        32 | unSigned two's Complement integer     |
   | cl_long          |        64 | Signed two's Complement integer       |
   | cl_ulong         |        64 | unSigned two's Complement integer     |
-  | cl_half          |        16 | Half presicision floating point value |
+  | cl_half          |        16 | Half precision floating point value |
   | cl_float         |        32 | Single precision floating point value |
   | cl_double        |        64 | Double precision floating point value |
   |------------------+-----------+---------------------------------------|
@@ -61,9 +66,9 @@ James A. Feister, OpenCL Notebook
   type: cl_platform_id - represents a platform of a OpenCL
   implementation
   
-  For example if you have a nvidia video card and intel cpu, you would
-  require two platforms, one to access the nvidia cuda video card
-  platform and one to access the intel smd
+  For example if you have a NVIDIA video card and Intel CPU, you would
+  require two platforms, one to access the NVIDIA CUDA video card
+  platform and one to access the Intel SMD
 
 ** Obtaining available platforms
    Platforms are only available if you have the appropriate vendor SDK
@@ -92,8 +97,10 @@ James A. Feister, OpenCL Notebook
    
    
 ** Obtaining platform information
-   The following information about a platform may be queried.
+   Table \ref{table:2} Shows all information about a platform may be queried.
    
+#+CAPTION: Platform query information
+#+LABEL:  table:2
    | Parameter name         | Purpose                                          |
    |------------------------+--------------------------------------------------|
    | CL_PLATFORM_NAME       | Name of the platform                             |
@@ -177,14 +184,16 @@ James A. Feister, OpenCL Notebook
    type. Then allocate and request device types for that number of
    devices specified.
    
-   The available devices to query for are in the following table.
+   Table \ref{table:3} shows available devices to query for are in the following table.
    
+#+CAPTION: Available device types
+#+LABEL: table:3
    | Device type                | Description                  |
    |----------------------------+------------------------------|
    | CL_DEVICE_TYPE_ALL         | All platform devices         |
    | CL_DEVICE_TYPE_DEFAULT     | All platform default devices |
    | CL_DEVICE_TYPE_CPU         | Host processor               |
-   | CL_DEVICE_TYPE_GPU         | Device containg a GPU        |
+   | CL_DEVICE_TYPE_GPU         | Device containing a GPU        |
    | CL_DEVICE_TYPE_ACCELERATOR | External accelerator device  |
    |----------------------------+------------------------------|
    
@@ -224,8 +233,10 @@ void sb_clPrintPlatformDevices ( cl_platform_id * platform )
    revisit in the future to resolve the shortcuts in this function.
    
    Just as with the platforms you can query devices for their information
-   as well.  The following table list the available fields for query.
+   as well.  Table \ref{table:4} list the available fields for query.
    
+#+CAPTION: Device query information
+#+LABEL: table:4
    | Parameter name               | Output Type | Purpose                                     |
    |------------------------------+-------------+---------------------------------------------|
    | CL_DEVICE_NAME               | char[]      | Name of device                              |
@@ -247,7 +258,7 @@ void sb_clPrintPlatformDevices ( cl_platform_id * platform )
    
    This is a helper function to do the query for these parameters.
    
-   #+BEGIN_SRC c
+   #+begin_src c
 void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
 {
 
@@ -281,12 +292,13 @@ void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
   clGetDeviceInfo ( *device, CL_DEVICE_COMPILER_AVAILABLE, sizeof (cl_bool), &qdevice_compiler, NULL);
   printf ("Device Compiler: %s\n", qdevice_compiler ? "true":"false");
 }
-   #+END_SRC
+   #+end_src
    
    There are plenty more things to query for as per the standard.
    http://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/clGetDeviceInfo.html
 
 * Contexts
+
   Contexts are created to manage devices from the same platform
   selected to work together.  You use the context to create command
   queues for sending kernels to devices.
@@ -295,3 +307,171 @@ void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
   platforms for all devices of each platform.
 
 ** Creating contexts
+
+   To populate the cl_context data structure you can grab contexts to selected
+   devices or devices of a specific type.
+
+   #+BEGIN_SRC c
+     cl_context clCreateContext (const cl_context_properties *properties, 
+                                 cl_uint num_devices, const cl_device_id *devices, 
+                                 (void CL_CALLBACK *pfn_notify) (const char *errinfo, 
+                                                                 const void *private_info, 
+                                                                 size_t cb, void *user_data), 
+                                 void *user_data, cl_int *errcode_ret);
+     
+     cl_context clCreateContextFromType (const cl_context_properties *properties,
+                                         cl_device_type device_type,
+                                         (void CL_CALLBACK *pfn_notify) (const char *errinfo, 
+                                                                         const void *private_info, 
+                                                                         size_t cb, void *user_data), 
+                                         void *user_data, cl_int *errcode_ret);
+   #+END_SRC
+
+   Table \ref{table:3} shows all the device types you are able to request.
+   =clCreateContext= is used to request user specific devices while
+   =clCreateContextFromType= performs a blanket request from a context of the
+   specified type.
+
+   Section 2.4.1 creating contexts in the book [fn:1] has a better explanation
+   of this process.  I will try my best here.
+
+** Specify the Context =*properties= array
+
+  Table \ref{table:5} shows the available properties you can query for in a
+  context. 
+
+  #+CAPTION: Context Property Parameters
+  #+LABEL: table:5
+  | Property name               | Property value   | Meaning                                                        |
+  |-----------------------------+------------------+----------------------------------------------------------------|
+  | CL_CONTEXT_PLATFORM         | cl_context_id    | Associates the context with the given platform                 |
+  | CL_CONTEXT_D3D10_DEVICE_KHR | ID3D10Device*    | Associates the context with the Direct3D device                |
+  | CL_GL_CONTEXT_KHR           | OS-Dependent     | Identifies an OpenGL context                                   |
+  | CL_EGL_DISPLAY_KHR          | EGLDisplay       | Displays the OpenGL-ES context on embedded devices             |
+  | CL_GLX_DISPLAY_KHR          | GLXContext       | Displays the OpenGL context on Linux                           |
+  | CL_WGL_HDC_KHR              | HDC              | Serves as the device context for the OpenGL context on Windows |
+  | CL_CGL_SHAREGROUP_KHR       | CGLShareGroupObj | Serves as the share group for the OpenGL context on Mac OS     |
+  |-----------------------------+------------------+----------------------------------------------------------------|
+
+  These are used as a *NULL* or *0* terminated array. For example
+
+  #+BEGIN_SRC c  
+    cl_context_properties r_context_properties[] = {
+      CL_CONTEXT_PLATFORM, (cl_context_properties)platforms[0],
+      CL_GL_CONTEXT, (cl_context_properties) glxGetCurrentContext(),
+      CL_GLX_DISPLAY_KHR, (cl_context_properties) glxGetCurrentDisplay(),
+      0};
+  #+END_SRC
+
+  Will query for a context of =platform[0]=, associate the current =GLXContext=
+  returned from =glxGetCurrentContext()=, associate the current =Display=
+  returned from =glxGetCurrentDisplay()=, and then the last field terminates
+  the array with a 0.
+
+  
+** Return function
+
+   The =void CL_CALLBACK *notify_func= is a callback function called when an
+   error occurs.  This may also be =NULL= to unset its use.
+
+** =*user_data=
+   Supplied by the user for use in the context.  On an error this will also be passed to the
+   registered callback function.  Its type can be anything from char to int or NULL.
+
+** =*errcode_ret=
+   Is the error code returned from creating the context.  
+
+   * CL_INVALID_PLATFORM 'if properties is NULL and no platform could be
+     selected or if platform value specified in properties is not a valid
+     platform.'
+
+   * CL_INVALID_VALUE 'if context property name in properties is not a
+     supported property name; if devices is NULL; if num_devices is equal to
+     zero; or if pfn_notify is NULL but user_data is not NULL.'
+
+   * CL_INVALID_DEVICE 'if devices contains an invalid device or are not
+     associated with the specified platform.'
+
+   * CL_DEVICE_NOT_AVAILABLE ' if a device in devices is currently not
+     available even though the device was returned by clGetDeviceIDs.'
+
+   * CL_OUT_OF_HOST_MEMORY 'if there is a failure to allocate resources
+     required by the OpenCL implementation on the host.'
+
+** Context request
+   After reading the above and the book [fn:1] we come up with the following
+   example piece of code.  This will use the =context_props= context type
+   request array from before with a type of GPU and exercises the optional call back
+   function and user data parameters, with =errcode= as the errorcode.  
+   #+BEGIN_SRC c  
+     cl_int errcode;
+     cl_context req_context = clCreateContextFromType (context_props, CL_DEVICE_TYPE_GPU, NULL, NULL, &errcode);
+   #+END_SRC
+
+
+** Context info request
+   Just as we did with =clGetDeviceInfo= and =clGetPlatformInfo= we can call
+   =clGetContextInfo= to retrieve information about the context given the
+   parameters in Table \ref{table:6}.  Some of these are additions in OpenCL 1.1
+
+   #+CAPTION: Context information request 
+   #+LABEL: table:6
+   | Parameter name                               | Output type             | Purpose                                                                                    |
+   |----------------------------------------------+-------------------------+--------------------------------------------------------------------------------------------|
+   | CL_CONTEXT_NUM_DEVICES                       | cl_uint                 | Returns the number of devices in the context                                               |
+   | CL_CONTEXT_DEVICES                           | cl_device_id[]          | Returns the devices in the context                                                         |
+   | CL_CONTEXT_PROPERTIES                        | cl_context_properties[] | Returns the property array associated with the context                                     |
+   | CL_CONTEXT_REFERENCE_COUNT                   | cl_uint                 | Returns the reference count of the context                                                 |
+   | CL_CONTEXT_D3D10_PREFER_SHARED_RESOURCES_KHR | cl_bool                 | Returns whether Direct3D shared resources will be accelerated more than unshared resources |
+   |----------------------------------------------+-------------------------+--------------------------------------------------------------------------------------------|
+
+    #+BEGIN_SRC c
+      void sb_clPrintContextInfo ( cl_context * context )
+      {
+	cl_uint num_devices;
+	cl_uint ref_count;
+	cl_bool d3d_resource;
+	cl_int cerror;
+      
+	/*  This was added in the 1.1 version
+	    cerror =  clGetContextInfo (*context, CL_CONTEXT_NUM_DEVICES, sizeof (cl_uint), &num_devices, NULL);
+	    if (cerror < 0) {
+	    perror ("Error getting context CL_CONTEXT_NUM_DEVICES info\n");
+	    exit (EXIT_FAILURE);
+	    }
+	    printf ("Context number of devices: %d\n", num_devices);
+      
+	*/
+	cerror = clGetContextInfo (*context, CL_CONTEXT_REFERENCE_COUNT, sizeof (cl_uint), &ref_count, NULL);
+	if (cerror < 0) {
+	  perror ("Error getting context CL_CONTEXT_REFERENCE_COUNT info\n");
+	  exit (EXIT_FAILURE);
+	}
+	printf ("Context reference count: %d\n", ref_count);
+      
+	/*  This was added in the 1.1 version
+	    cerror = clGetContextInfo (*context, CL_CONTEXT_D3D10_PREFER_SHARED_RESOURCES_KHR, sizeof (cl_bool), &d3d_resource, NULL);
+	    if (cerror < 0) {
+	    perror ("Error getting context CL_CONTEXT_D3D10_PREFER_SHARED_RESOURCES_KHR info\n");
+	    exit (EXIT_FAILURE);
+	    }
+	    printf ("Context d3d exchange: %s\n", d3d_resource ? "true":"false");
+	*/
+      
+      }
+    #+END_SRC
+
+
+* Programs
+  Represented by =cl_program= data structure, programs contain multiple
+  kernels to be run on your devices.
+
+** Creating
+
+* Footnotes
+
+[fn:1] OpenCL in Action: How to accelerate graphics and computation. 
+  By Matthew Scarpino; http://www.manning.com/scarpino2/
+
+[fn:2] OpenCL 1.0 reference pages: http://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/
+ 

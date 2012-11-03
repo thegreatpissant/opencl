@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <opencl-utils/include/CL/cl.h>
-#include <opencl-utils/include/clrun.h>
+#include <CL/cl.h>
+//#include <opencl-utils/include/clrun.h>
 void sb_clPrintContextInfo ( cl_context * context );
 void sb_clPrintPlatformDevices ( cl_platform_id * platform );
 void sb_clPrintPlatformDeviceInfo ( cl_device_id * device );
@@ -13,11 +13,11 @@ int main (int argc, char ** argv)
 {
   
   cl_int ret;
-
+/*
   if (( ret = clrInit() ))
     perror ("ERROR: Initializing OpenCL\n");
   printf ("Success! OpenCL %s\n", clrHasOpenCL() ? "exists!" : "does not exist. ");
-
+*/
 
   cl_platform_id *platforms;
   cl_uint num_entries = 1;

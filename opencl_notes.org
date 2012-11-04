@@ -636,6 +636,23 @@ void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
 
 
 
+
+* Platform Specific Notes
+
+** Intel
+
+   The Intel development package is found at [[http://software.intel.com/en-us/vcsource/tools/opencl-sdk][Intel OpenCL sdk]]. Read
+   the installation instructions for your platform.  
+
+   It does not contain an Ubuntu package, use the instructions at [[http://mhr3.blogspot.com/2011/05/opencl-on-ubuntu.html
+ ][Intel sdk Ubuntu]] to convert it over.
+
+   - Install the 'rpm', 'alien' and 'libnuma1' packages
+   - Convert the rpm to a dpkg =fakeroot alien --to-dev <intel-sdk>=
+   - Install the deb, =sudo dpkg -i <intel-sdk.deb>=
+   - link the opencl lib to /usr/lib =sudo ln -s /usr/lib64/libOpenCL.so /usr/lib/libOpenCL.so=
+   - run ldconfig =sudo ldconfig=
+     
 * Footnotes
 
 [fn:1] OpenCL in Action: How to accelerate graphics and computation. 

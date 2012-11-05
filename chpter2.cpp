@@ -285,9 +285,9 @@ cl_program sb_clCreateProgramFromSource (char * program_buffer, size_t *program_
 cl_int sb_clBuildProgram (cl_program * program, 
 			  cl_uint num_devices, const cl_device_id *device_list, 
 			  const char *options, 
-			  void (*pfn_notify)(cl_program, void *user_data), 
+			  void *pfn_notify, 
 			  void *user_data)
 {
-  
+  clBuildProgram ( *program, num_devices, device_list, options, NULL, user_data);
   return 0;
 }

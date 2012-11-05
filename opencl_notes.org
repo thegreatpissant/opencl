@@ -6,11 +6,26 @@ James A. Feister, OpenCL Notebook
   This is my notebook for OpenCL.  It contains a collection of notes
   from various resources.  Some of these are taken verbatim from the
   texts so this should not be taken as my own work.
+
+  Though I tried my best to stick to the text it can become trying and
+  repetive to reproduce information that is already available in some
+  form or another, and possibly more up to date. Always refer to the
+  Reference Pages [fn:2] for the most thurough and up to date information.
   
   References include:
   - OpenCL in action[fn:1]: How to Accelerate Graphics and Computation
-  - OpenCL 1.0 Reference Pages [fn:2]
+  - OpenCL 1.0 Reference Pages [fn:2] 
+
+  The hardest or most tedious part is setting up the context and
+  managing the resources.  This involves identifying the devices,
+  making sure you program can run and then what, how, and when your
+  resources allocated will run your program.  
+
+  Its not easy but what is.  Could it be easier???  Maybe but this is
+  not a hello world example.  This is a semi-begin er to intermediate
+  intro to advanced topics.  Stick with it.
     
+
 * About OpenCL
   OpenCL allows for utilizing different VECTOR processing units while
   remaining manufacture agnostic.  You can use Intel, AMD, NVIDIA, or
@@ -25,6 +40,8 @@ James A. Feister, OpenCL Notebook
     elements
   - Computational: Data structure that contains multiple elements of
   the same data type.
+
+
 * Data Structures
   There are six basic data structures of OpenCL
 
@@ -40,6 +57,7 @@ James A. Feister, OpenCL Notebook
      
   6) Command Queues
      
+
 * Primitive Data Types
   
   Table \ref{table:1} shows a list of all primitive OpenCL data types found in CL/cl_platform.h
@@ -61,6 +79,7 @@ James A. Feister, OpenCL Notebook
   | cl_double        |        64 | Double precision floating point value |
   |------------------+-----------+---------------------------------------|
   
+
 * Platform Data Structure
   
   type: cl_platform_id - represents a platform of a OpenCL
@@ -74,23 +93,29 @@ James A. Feister, OpenCL Notebook
    Platforms are only available if you have the appropriate vendor SDK
    installed on your system.
    
-   Function def: cl_int clGetPlatformIDs (cl_uint num_entries,
-   cl_platform_id * platforms, cl_uint * num_platforms);
+   Function def: 
+#+BEGIN_SRC c
+  cl_int clGetPlatformIDs (cl_uint num_entries, 
+                           cl_platform_id * platforms, 
+                           cl_uint * num_platforms);
+#+END_SRC
+
    
    The clGetPlatformIDs function allows for you to query the number of
    available platforms.
    
-   #+begin_src cpp
-  cl_int num_platforms; clGetPlatformIDs (1, NULL, &num_platforms);
+   #+begin_src c
+     cl_int num_platforms; 
+     clGetPlatformIDs (1, NULL, &num_platforms);
    #+end_src
    
    You then can use it to obtain handles to those platforms.  Which
    allow you to query for information on them.
    
-   #+begin_src cpp
-  cl_platform_id platforms = (platforms *) malloc ( sizeof
-  (cl_platform_id) * num_platforms ); clGetPlatformIDs (num_platforms,
-  platforms, NULL);
+   #+begin_src c
+     cl_platform_id platforms = (platforms *) malloc ( sizeof (cl_platform_id) * num_platforms ); 
+     
+     clGetPlatformIDs (num_platforms, platforms, NULL);
    #+end_src
    
    You now have handles to all platforms available on your system.
@@ -114,9 +139,11 @@ James A. Feister, OpenCL Notebook
    information.
    
    #+begin_src c
-  cl_int clGetPlatformInfo(cl_platform_id platform, cl_platform_info
-  param_name, size_t param_value_size, void *param_value, size_t
-  *param_value_size_ret)
+     cl_int clGetPlatformInfo(cl_platform_id platform, 
+                              cl_platform_info param_name, 
+                              size_t param_value_size, 
+                              void *param_value, 
+                              size_t *param_value_size_ret);
    #+end_src
    
    The following user created support functions will query for all
@@ -297,6 +324,7 @@ void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
    There are plenty more things to query for as per the standard.
    http://www.khronos.org/registry/cl/sdk/1.0/docs/man/xhtml/clGetDeviceInfo.html
 
+
 * Contexts
 
   Contexts are created to manage devices from the same platform
@@ -306,7 +334,7 @@ void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
   An application may use multiple contexts to utilize multiple
   platforms for all devices of each platform.
 
-** Creating contexts
+** Creating
 
    To populate the cl_context data structure you can grab contexts to selected
    devices or devices of a specific type.
@@ -409,7 +437,7 @@ void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
    #+END_SRC
 
 
-** Context info request
+** Information request
    Just as we did with =clGetDeviceInfo= and =clGetPlatformInfo= we can call
    =clGetContextInfo= to retrieve information about the context given the
    parameters in Table \ref{table:6}.  Some of these are additions in OpenCL 1.1
@@ -466,7 +494,7 @@ void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
   Represented by =cl_program= data structure, programs contain multiple kernels
   to be run on your devices.  =cl_program='s may also be queried for information.
 
-** Creating Programs
+** Creating 
    Programs are read from files on disk and put into memory for OpenCL to
    access.  Users are required to read the files themselves, as OpenCL does not
    have file reading utilities builtin.  This is the same concept as OpenGL
@@ -612,29 +640,222 @@ void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
    #+END_SRC
    
    
-** Compiling Programs 
+** Compiling 
    After loading the program source code it must be compiled.  
    
+   Here are some of the build options available.  See the [fn:2]
+   specification for more information.
+
+   | Option                        | Description                                                                   |
+   |-------------------------------+-------------------------------------------------------------------------------|
+   | -D =name=                     | Predefine name as a macro, with definition 1                                  |
+   | -D =name\=definition=         | set the contents of a definition                                              |
+   | -I =dir=                      | add the directory =dir= to the list of directories to search for header files |
+   | -cl-single-precision-constant | Tread double precision floating point constant as a single precision constant |
+   | -cl-denorms-are-zero          | See [fn:2]                                                                    |
+   | -cl-opt-disable               | disable all optimization's, default all optimization's are used.              |
+   |-------------------------------+-------------------------------------------------------------------------------|
+
+   #+BEGIN_SRC c
+
+cl_int clBuildProgram (	cl_program program,
+ 	cl_uint num_devices,
+ 	const cl_device_id *device_list,
+ 	const char *options,
+ 	void (*pfn_notify)(cl_program, void *user_data),
+ 	void *user_data)
+
+   #+END_SRC
+
+   - program
    
+     The program object
+
+   - device_list
+
+     A pointer to a list of devices that are in program. If
+     device_list is NULL value, the program executable is built for
+     all devices associated with program for which a source or binary
+     has been loaded. If device_list is a non-NULL value, the program
+     executable is built for devices specified in this list for which
+     a source or binary has been loaded.
+
+   - num_devices
+
+     The number of devices listed in device_list.
+
+   - options
+
+     A pointer to a string that describes the build options to be used
+     for building the program executable. The list of supported
+     options is described in "Build Options" below.
+
+   - pfn_notify
+
+     A function pointer to a notification routine. The notification
+     routine is a callback function that an application can register
+     and which will be called when the program executable has been
+     built (successfully or unsuccessfully). If pfn_notify is not
+     NULL, clBuildProgram does not need to wait for the build to
+     complete and can return immediately. If pfn_notify is NULL,
+     clBuildProgram does not return until the build has
+     completed. This callback function may be called asynchronously by
+     the OpenCL implementation. It is the application's responsibility
+     to ensure that the callback function is thread-safe.
+
+   - user_data
+
+     Passed as an argument when pfn_notify is called. user_data can be
+     NULL.
 
 
 
 
 
+** Information request
+   
+   You may then access information about the program by using the
+   =clGetProgramInfo= function.
+#+BEGIN_SRC c
+clGetProgramInfo(cl_program program, cl_program_info param_name,
+    size_t param_value_size, void *param_value,
+    size_t *param_value_size_ret
+#+END_SRC
+
+   =cl_program_info= is an enum that identifies the following data
+   queries.
+
+   | Parameter name             | Output type     | Purpose                                                             |
+   |----------------------------+-----------------+---------------------------------------------------------------------|
+   | CL_PROGRAM_CONTEXT         | cl_context      | Returns the context used to create the program                      |
+   | CL_PROGRAM_DEVICES         | cl_device_id[]  | Returns the devices targeted by the program                         |
+   | CL_PROGRAM_NUM_DEVICES     | cl_uint         | Returns the number of devices targeted by the program               |
+   | CL_PROGRAM_SOURCE          | char[]          | Returns the program’s source code concatenated into a single string |
+   | CL_PROGRAM_BINARIES        | unsigned_char** | Returns the array of binary buffers associated with the program     |
+   | CL_PROGRAM_BINARY_SIZES    | size_t[]        | Returns the size of each of the program’s binary buffers            |
+   | CL_PROGRAM_REFERENCE_COUNT | cl_uint         | Returns the program’s reference count                               |
+   |----------------------------+-----------------+---------------------------------------------------------------------|
+   
+   You may then use the =clGetProgramBuildInfo= to obtain information
+   abount the build proccess of a program.
+
+#+BEGIN_SRC c
+clGetProgramBuildInfo(cl_program program,
+    cl_device_id device,
+    cl_program_build_info param_name,
+    size_t param_value_size, void *param_value,
+    size_t *param_value_size_ret)
+#+END_SRC
+
+   =cl_program_build_info= is a enum type for the following
+   information
+
+   | Parameter name           | Output type     | Purpose                                                          |
+   |--------------------------+-----------------+------------------------------------------------------------------|
+   | CL_PROGRAM_BUILD_STATUS  | cl_build_status | Identifies whether the build succeeded, failed, or is continuing |
+   | CL_PROGRAM_BUILD_OPTIONS | char[]          | Returns the options used to configure the build                  |
+   | CL_PROGRAM_BUILD_LOG     | char[]          | Returns the build log—the compiler’s output                      |
+   |--------------------------+-----------------+------------------------------------------------------------------|
 
 
 
 
+* Kernels
+
+  Are the packaged items of programs.  These are then dispenced
+  around to available command queues.
+
+  
+** Creating
+   
+   To create a kernel for every function in your kernel use the
+   =clCreateKernelsInProgram= function.  This will creates multiple
+   kernels to use.  Like the previous function you can call this
+   twice to obtain information about how much memory to allocate for
+   the kernels.
+
+#+BEGIN_SRC c
+clCreateKernelsInProgram(cl_program program, cl_uint num_kernels,
+    cl_kernel *kernels, cl_uint *num_kernels_ret);
+#+END_SRC
+
+   To create a single kernel for a known function name use the
+   =clCreateKernel= function.  You must know the name of the function
+   to use this.
+
+#+BEGIN_SRC c
+  clCreateKernel(cl_program program, const char *kernel_name, cl_int *error)
+#+END_SRC
+
+** Information request
+   
+   You may query a kernel for information about what function it
+   represents and what program it belongs to using the
+   =clGetKernelInfo= function.
+
+#+BEGIN_SRC c
+  clGetKernelInfo(cl_kernel kernel, cl_kernel_info param_name,
+                  size_t param_value_size, 
+                  void *param_value, 
+                  size_t *param_value_size_ret)
+#+END_SRC
+
+   The =cl_kernel_info= enum may use the following values.
+
+| Parameter name            | Output type | Purpose                                                                            |
+|---------------------------+-------------+------------------------------------------------------------------------------------|
+| CL_KERNEL_FUNCTION_NAME   | char[]      | Returns the name of the function from which the kernel was formed                  |
+| CL_KERNEL_NUM_ARGS        | cl_uint     | Returns the number of input arguments accepted by the kernel’s associated function |
+| CL_KERNEL_REFERENCE_COUNT | cl_uint     | Returns the number of times the kernel has been referenced in code                 |
+| CL_KERNEL_CONTEXT         | cl_context  | Returns the context associated with the kernel                                     |
+| CL_KERNEL_PROGRAM         | cl_program  | Returns the program from which the kernel was created                              |
+|---------------------------+-------------+------------------------------------------------------------------------------------|
 
 
+* Command Queues
 
+  These are the lines that pump kernels and data to devices.  Used to
+  associate devices with proccessing capabilities, these recieve
+  kernels and execute them on their associated devices.
 
+  
+** Creating
 
+   Command queues are represented by the =cl_command_queue= struct.
+   They do not have an information function and only one function
+   creates new ones, =clCreateCommandQueue=.  This will return the
+   cl_command_queue structure.
+#+BEGIN_SRC c
+  cl_command_queue clCreateCommandQueue(cl_context context, cl_device_id device,
+                       cl_command_queue_properties properties, 
+                       cl_int *err)
+#+END_SRC
 
+   =cl_command_queue_properties= may have the following value
 
+  - CL_QUEUE_PROFILING_ENABLE
+    Enable profiling events 
 
+  - CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE  
+    Enables out of order
+   
+   You then increment and decrement the reference count just like a
+    context. =clRetainCommandQueue= increments,
+    =clReleaseCommandQueue= decrements.
 
+** Enqueuing kernel execution commands
 
+   One of example of enqueuing kernels to queues is the
+   =clEnqueueTask=
+   #+BEGIN_SRC c
+     clEnqueueTask(cl_command_queue queue, 
+                   cl_kernel kernel,
+                   cl_uint num_events, 
+                   const cl_event *wait_list, 
+                   cl_event *event);
+   #+END_SRC
+
+   This will then go to the device when its time is the queue comes up.
 
 
 * Platform Specific Notes
@@ -653,6 +874,7 @@ void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
    - link the opencl lib to /usr/lib =sudo ln -s /usr/lib64/libOpenCL.so /usr/lib/libOpenCL.so=
    - run ldconfig =sudo ldconfig=
      
+
 * Footnotes
 
 [fn:1] OpenCL in Action: How to accelerate graphics and computation. 

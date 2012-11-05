@@ -8,6 +8,8 @@ void sb_clPrintPlatformDevices ( cl_platform_id * platform );
 void sb_clPrintPlatformDeviceInfo ( cl_device_id * device );
 void sb_clPrintPlatformInfo ( cl_platform_id * extension);
 void sb_clPrintPlatformExtension ( cl_platform_id * platform, cl_int extension );
+int  sb_clReadSourceProgramFromDisk ( char * file_name, char * program_buffer, int *program_size );
+cl_program sb_clCreateProgramFromSource (char * program_buffer, int program_size, cl_context context );
 
 int main (int argc, char ** argv)
 {
@@ -96,7 +98,7 @@ void sb_clPrintPlatformDevices ( cl_platform_id * platform )
     {
       devices = (cl_device_id*)malloc (sizeof (cl_device_id) * num_devices);
       clGetDeviceIDs (*platform, CL_DEVICE_TYPE_ALL, num_devices, devices, NULL);
-      int i = 0;
+      uint i = 0;
       for (; i < num_devices; ++i) {
 	printf ("Device #%d ", i);
 	sb_clPrintPlatformDeviceInfo (devices+i);
@@ -106,9 +108,9 @@ void sb_clPrintPlatformDevices ( cl_platform_id * platform )
 
 void sb_clPrintContextInfo ( cl_context * context )
 {
-  cl_uint num_devices;
+  //  cl_uint num_devices;
   cl_uint ref_count;
-  cl_bool d3d_resource;
+  //  cl_bool d3d_resource;
   cl_int cerror;
 
   /*  This was added in the 1.1 version
@@ -169,7 +171,7 @@ void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
   printf ("Device Extensions: %s\n", qstring);
 
   clGetDeviceInfo ( *device, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof (cl_ulong), &qmemory_size, NULL);
-  printf ("Device Address Space Size: %d\n", qmemory_size);
+  printf ("Device Address Space Size: %ld\n", qmemory_size);
 
   clGetDeviceInfo ( *device, CL_DEVICE_ADDRESS_BITS, sizeof (cl_uint), &qaddress_space, NULL);
   printf ("Device Address Bits: %d\n", qaddress_space);
@@ -231,4 +233,61 @@ void sb_clPrintPlatformExtension ( cl_platform_id * platform, cl_int extension )
   ret = clGetPlatformInfo (*platform, extension, param_size, ext_data, NULL);
   printf ("%s", ext_data);
   free (ext_data);
+}
+
+int sb_clReadSourceProgramFromDisk ( char * file_name, char * program_buffer, int *program_size )
+{
+  long file_size;
+  FILE *file_handle;
+  file_handle = fopen (file_name, "r");
+  if ( NULL == file_handle ) {
+    perror ("Error opening file\n"); 
+    return -1;
+  }
+
+  fseek (file_handle, 0, SEEK_END);
+  file_size = ftell (file_handle);
+  rewind (file_handle);
+  
+  program_buffer = (char *) malloc (file_size + 1);
+  program_buffer [file_size] = '\0';
+  fread (program_buffer, sizeof (char), file_size, file_handle);
+  fclose (file_handle);
+  *program_size = file_size;
+  return file_size;
+}
+
+cl_program sb_clCreateProgramFromSource (char * program_buffer, size_t *program_size, cl_context context )
+{
+  cl_program program;
+  cl_int error_code;
+  program = clCreateProgramWithSource (context, 1, (const char **) &program_buffer, program_size, &error_code);
+  if (NULL == program) {
+    switch (error_code) {
+    case CL_INVALID_CONTEXT :
+      perror ("Source Program: Invalid Context\n");
+      break;
+    case CL_INVALID_VALUE :
+      perror ("Source Program: Invalid Value\n");
+      break;
+    case CL_OUT_OF_HOST_MEMORY:
+      perror ("Source Program: Out of host memory\n");
+      break;
+    default:
+      perror ("Source Program: Unknown error\n");
+      break;
+    }
+    return NULL;
+  }
+  return program;
+} 
+
+cl_int sb_clBuildProgram (cl_program * program, 
+			  cl_uint num_devices, const cl_device_id *device_list, 
+			  const char *options, 
+			  void *pfn_notify, 
+			  void *user_data)
+{
+  clBuildProgram ( *program, num_devices, device_list, options, NULL, user_data);
+  return 0;
 }

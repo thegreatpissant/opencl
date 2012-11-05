@@ -49,7 +49,7 @@ int main (int argc, char ** argv)
   cl_context qcontext;
   cl_device_id * devices;
   cl_uint num_devices = 0;
-  clGetDeviceIDs (*platforms, CL_DEVICE_TYPE_GPU, 1, NULL, &num_devices);
+  clGetDeviceIDs (*platforms, CL_DEVICE_TYPE_GPU, 0, NULL, &num_devices);
   devices = (cl_device_id *) malloc (sizeof (cl_device_id) *num_devices);
   clGetDeviceIDs (*platforms, CL_DEVICE_TYPE_GPU, num_devices, devices, NULL);
   qcontext = clCreateContext (NULL, 1, devices, NULL, NULL, &context_error);

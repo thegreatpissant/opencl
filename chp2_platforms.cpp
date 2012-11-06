@@ -96,18 +96,24 @@ int main ()
   }
 
   /*
-   * Step 4, program
+   * Step 4, The Program
    */
   char * fname = "cl1.cl";
   std::string * fbuffer = new std::string;
   size_t program_size;
+  cl_program program;
+  cl_int program_ret;
   
   sb_clReadSourceProgramFromDisk ( fname, fbuffer);
   cout  << "Program read: " << *fbuffer << endl;
-
-  sb_clCreateProgramFromSource ( fbuffer, context );
-
-  
+  program = sb_clCreateProgramFromSource ( fbuffer, context );
+  if (program == NULL) {
+    EXIT_FAIL;
+  }
+  program_ret = sb_clBuildProgram (&program, 1, devices, NULL, NULL, NULL);
+  if (program_ret < 0) {
+    EXIT_FAIL;
+  }
   /*
    * Step 5, kernel
    */

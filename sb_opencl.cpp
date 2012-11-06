@@ -130,21 +130,22 @@ cl_program sb_clCreateProgramFromSource ( string * program_buffer, cl_context co
   cl_int error_code;
   
   char * source = (char *) malloc (sizeof (char ) * (program_buffer->length() + 1));
+  source[program_buffer->length()] = '\0';
   program_buffer->copy(source, program_buffer->length());
   program = clCreateProgramWithSource (context, 1, (const char **) &source, NULL, &error_code);
-  if ( program == NULL ) {
+  if ( program == NULL || error_code < 0 ) {
     switch (error_code) {
     case CL_INVALID_CONTEXT :
-      perror ("Source Program: Invalid Context\n");
+      cerr << "Source Program: Invalid Context\n";
       break;
     case CL_INVALID_VALUE :
-      perror ("Source Program: Invalid Value\n");
+      cerr << "Source Program: Invalid Value\n";
       break;
     case CL_OUT_OF_HOST_MEMORY:
-      perror ("Source Program: Out of host memory\n");
+      cerr << "Source Program: Out of host memory\n";
       break;
     default:
-      perror ("Source Program: Unknown error\n");
+      cerr << "Source Program: Unknown error\n";
       break;
     }
     return NULL;
@@ -152,3 +153,80 @@ cl_program sb_clCreateProgramFromSource ( string * program_buffer, cl_context co
 
   return program;
 } 
+
+cl_int sb_clBuildProgram ( cl_program * program, 
+			   int device_num, cl_device_id *devices, 
+			   const char * options, 
+			   void * callback, void * user_data)
+{
+
+  cl_int program_ret;
+
+  program_ret = clBuildProgram (*program, 1, devices, options, (void(*)(const char*, const void*, size_t, void*))callback, user_data);
+  
+  switch (program_ret) {
+  case CL_SUCCESS:
+    cout << "Program built without errors." << endl;
+    break;
+  case CL_INVALID_PROGRAM:
+    cerr << "Error: Invalid Program Object." << endl;
+    break;
+  case CL_INVALID_VALUE:
+    cerr << "Error: Invalid Value for devices." << endl;
+    break;
+  case CL_INVALID_DEVICE:
+    cerr << "Error: Invalid device list." << endl;
+    break;
+  case CL_INVALID_BINARY:
+    cerr << "Error: Ivalid Binary for devices." << endl;
+    break;
+  case CL_INVALID_BUILD_OPTIONS:
+    cerr << "Error: Invalid build options." << endl;
+    break;
+    //  case CL_INVALID_OPERATION:
+    //    cerr << "Error: Program build did not complete." << endl;
+    //    break;
+  case CL_COMPILER_NOT_AVAILABLE:
+    cerr << "Error: Source compilation not available for device." << endl;
+    break;
+  case CL_BUILD_PROGRAM_FAILURE:
+    cerr << "Error: Failure to build program." << endl;
+    break;
+  case CL_INVALID_OPERATION:
+    cerr << "Error: Kernel objects already attached to program." << endl;
+    break;
+  case CL_OUT_OF_RESOURCES:
+    cerr << "Error: Failure to allocate required resources." << endl;
+    break;
+  case CL_OUT_OF_HOST_MEMORY:
+    cerr << "Error: Failure to allocate memory resources." << endl;
+    break;
+default:
+    cerr << "Error: Unknown error building Program." << endl;
+    break;
+  }
+  if (program_ret != CL_SUCCESS) {
+    size_t build_param_size;
+    char * build_param_value;
+
+    clGetProgramBuildInfo (*program, devices[0],
+			   CL_PROGRAM_BUILD_LOG,
+			   1, NULL,
+			   &build_param_size);
+    build_param_value = (char *) malloc (sizeof (char)*(build_param_size+1));
+    build_param_value[build_param_size] = '\0';
+    cl_int build_status = clGetProgramBuildInfo (*program, devices[0],
+						 CL_PROGRAM_BUILD_LOG,
+						 build_param_size, build_param_value,
+						 NULL);
+
+    if (build_status != CL_SUCCESS) {
+      cerr << "Error: obtaining build status failed." << endl;
+      return -1;
+    }
+    cout << "Compiler log: " << endl
+	 << build_param_value << endl;
+    return -1;
+  }
+  return program_ret;
+}

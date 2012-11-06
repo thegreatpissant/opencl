@@ -494,6 +494,7 @@ void sb_clPrintPlatformDeviceInfo ( cl_device_id * device )
   Represented by =cl_program= data structure, programs contain multiple kernels
   to be run on your devices.  =cl_program='s may also be queried for information.
 
+  
 ** Creating 
    Programs are read from files on disk and put into memory for OpenCL to
    access.  Users are required to read the files themselves, as OpenCL does not

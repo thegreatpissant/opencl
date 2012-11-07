@@ -230,3 +230,76 @@ default:
   }
   return program_ret;
 }
+
+cl_kernel sb_clCreateKernel (cl_program program, char * function_name)
+{
+  cl_kernel kernel;
+  cl_int kern_error;
+
+  kernel = clCreateKernel (program, function_name, &kern_error);
+  if (kernel == NULL) {
+    switch(kern_error) {
+    case CL_INVALID_PROGRAM: 
+      cerr << "Program is not a valid program object." << endl;
+      break;
+    case CL_INVALID_PROGRAM_EXECUTABLE: 
+      cerr << "There is no successfully built executable for program." << endl;
+      break;
+    case CL_INVALID_KERNEL_NAME: 
+      cerr << "kernel_name \"" << function_name << "\" is not found in program." << endl;
+      break;
+    case CL_INVALID_KERNEL_DEFINITION:
+      cerr << "The function definition for __kernel function given by kernel_name such" << endl
+	   << "as the number of arguments, the argument types are not the same for all" << endl
+	   << "devices for which the program executable has been built." << endl;
+      break;
+    case CL_INVALID_VALUE: 
+      cerr << "kernel_name is NULL." << endl;
+      break;
+    case CL_OUT_OF_RESOURCES: 
+      cerr << "Failure to allocate resources required by the OpenCL implementation on the device." << endl;
+      break;
+    case CL_OUT_OF_HOST_MEMORY:
+      cerr << "Failure to allocate resources required by the OpenCL implementation on the host." << endl;
+      break;
+    default:
+      cerr << "Unknown error." << endl;
+      break;
+    }
+  }
+  return kernel;
+}
+
+cl_command_queue sb_clCreateCommandQueue (cl_context context , cl_device_id device, cl_command_queue_properties properties)
+{
+  cl_command_queue command_queue;
+  cl_int queue_error;
+
+  command_queue = clCreateCommandQueue (context, device, properties, &queue_error);
+  if (command_queue == NULL) {
+    switch (queue_error) {
+    case CL_INVALID_CONTEXT: 
+      cerr << "Context is not a valid context." << endl;
+      break;
+    case CL_INVALID_DEVICE: 
+      cerr << "Device is not a valid device or is not associated with context." << endl;
+      break;
+    case CL_INVALID_VALUE: 
+      cerr << "Values specified in properties are not valid." << endl;
+      break;
+    case CL_INVALID_QUEUE_PROPERTIES:
+      cerr << "Values specified in properties are valid but are not supported by the device." << endl;
+      break;
+    case CL_OUT_OF_RESOURCES:
+      cerr << "Failure to allocate resources required by the OpenCL implementation on the device." << endl;
+      break;
+    case CL_OUT_OF_HOST_MEMORY: 
+      cerr << "Failure to allocate resources required by the OpenCL implementation on the host." << endl;
+      break;
+    default:
+      cerr << "Unknown error." << endl;;
+      break;
+    }
+  }
+  return command_queue;
+}

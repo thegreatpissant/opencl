@@ -55,13 +55,13 @@ int main ()
   /*
    * Step 2, get devices
    */
-  if ( clGetDeviceIDs ( platforms[platform_id], CL_DEVICE_TYPE_GPU, NULL, NULL, &num_devices) < 0 ) {
+  if ( clGetDeviceIDs ( platforms[platform_id], CL_DEVICE_TYPE_ALL, NULL, NULL, &num_devices) < 0 ) {
     cerr << "Could not query any devices for platform." << endl;
     EXIT_FAIL;
   }
   
   if (num_devices < 1) {
-    cerr << "Did not find any CL_DEVICE_TYPE_GPU on the platform." << endl;
+    cerr << "Did not find any CL_DEVICE_TYPE_ALL on the platform." << endl;
     EXIT_FAIL;
   }
   
@@ -74,7 +74,7 @@ int main ()
     EXIT_FAIL;
   }
   
-  if ( clGetDeviceIDs (platforms[platform_id], CL_DEVICE_TYPE_GPU,
+  if ( clGetDeviceIDs (platforms[platform_id], CL_DEVICE_TYPE_ALL,
 		       num_devices, devices, NULL) < 0 ) {
     cerr << "Could not get the device requested" << endl;
     EXIT_FAIL;
@@ -114,11 +114,42 @@ int main ()
   if (program_ret < 0) {
     EXIT_FAIL;
   }
-  /*
-   * Step 5, kernel
-   */
 
   /*
-   * Step 6, Queues
+   * Step 5, Create kernels for functions
    */
+  cl_kernel kernel;
+
+  if ( NULL == (kernel = sb_clCreateKernel (program, "good")) ) {
+    EXIT_FAILURE;
+  } else {
+    cout << "Got kernel for function \'good\'." << endl;
+  }
+
+  /*
+   * Step 6, Create Command Queues
+   */
+  cl_command_queue command_queue;
+
+  if ( NULL == (command_queue = sb_clCreateCommandQueue (context, devices[0], CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE)) ) {
+    EXIT_FAILURE;
+  } else {
+    cout << "Got command queue from device and context requested. " << endl;
+  }
+
+  /*
+   * Step 7, Enque the kernel
+   */
+  cl_int task_error;
+  task_error = clEnqueueTask (command_queue, kernel, 0, NULL, NULL);
+  if (task_error < 0) {
+    cerr << "Could not enqueue the kernel" << endl;
+  } else {
+    cout << "Kernel was enqueued" << endl;
+  }
+
+  clReleaseCommandQueue (command_queue);
+  clReleaseKernel  (kernel);
+  clReleaseProgram (program);
+  clReleaseContext (context);
 }

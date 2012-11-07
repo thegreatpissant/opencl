@@ -763,8 +763,8 @@ clGetProgramBuildInfo(cl_program program,
 
 * Kernels
 
-  Are the packaged items of programs.  These are then dispenced
-  around to available command queues.
+  Are the packaged items of programs.  These are then dispensed around
+  to available command queues.
 
   
 ** Creating

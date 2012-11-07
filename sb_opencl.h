@@ -13,4 +13,6 @@ cl_int sb_clBuildProgram ( cl_program * program,
 			   int device_num, cl_device_id *devices, 
 			   const char * options, 
 			   void * callback, void * user_data);
+cl_kernel sb_clCreateKernel (cl_program program, char * function_name);
+cl_command_queue sb_clCreateCommandQueue (cl_context context , cl_device_id device, cl_command_queue_properties properties);
 #endif

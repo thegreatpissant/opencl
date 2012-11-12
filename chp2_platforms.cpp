@@ -98,7 +98,7 @@ int main ()
   /*
    * Step 4, The Program
    */
-  char * fname = "cl1.cl";
+  char * fname = "cl3.cl";
   std::string * fbuffer = new std::string;
   size_t program_size;
   cl_program program;
@@ -138,12 +138,29 @@ int main ()
   }
 
   /*
-   * Step 7, Enque the kernel
+   * Step 7, set the args
+   */
+  cl_float a1 = 3, a2 = 2, a3 = 1;
+
+  if (sb_clSetKernelArg (kernel, 0, sizeof (cl_float), &a1) != CL_SUCCESS) {
+    cerr << "Failed to set kernel arg 0" << endl;
+    EXIT_FAIL;
+  }
+  if (sb_clSetKernelArg (kernel, 1, sizeof (cl_float), &a2) != CL_SUCCESS) {
+    cerr << "Failed to set kernel arg 1" << endl;
+    EXIT_FAIL;
+  }  
+  if (sb_clSetKernelArg (kernel, 2, sizeof (cl_float), &a3) != CL_SUCCESS) {
+    cerr << "Failed to set kernel arg 2" << endl;
+    EXIT_FAIL;
+  }
+
+  /*es
+   * Step 8, Enque the kernel
    */
   cl_int task_error;
-  task_error = clEnqueueTask (command_queue, kernel, 0, NULL, NULL);
-  if (task_error < 0) {
-    cerr << "Could not enqueue the kernel" << endl;
+  if (sb_clEnqueueTask (command_queue, kernel, 0, NULL, NULL) != CL_SUCCESS ) {
+    EXIT_FAIL;
   } else {
     cout << "Kernel was enqueued" << endl;
   }

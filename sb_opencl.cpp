@@ -169,7 +169,7 @@ cl_int sb_clBuildProgram ( cl_program * program,
 
   cl_int program_ret;
 
-  program_ret = clBuildProgram (*program, 1, devices, options, (void(*)(const char*, const void*, size_t, void*))callback, user_data);
+  program_ret = clBuildProgram (*program, 1, devices, options, (void(*)(cl_program, void*))callback, user_data);
   
   switch (program_ret) {
   case CL_SUCCESS:
@@ -238,7 +238,7 @@ default:
   return program_ret;
 }
 
-cl_kernel sb_clCreateKernel (cl_program program, char * function_name)
+cl_kernel sb_clCreateKernel (cl_program program, const char * function_name)
 {
   cl_kernel kernel;
   cl_int kern_error;
@@ -394,8 +394,37 @@ cl_int sb_clSetKernelArg (cl_kernel kernel, cl_uint arg_index, size_t arg_size, 
 		 "There is a failure to allocate resources required by the OpenCL implementation "
 		 "on the host.");
    default:
+      cerr << "Unknown error" << endl;
       break;
     }
   }
   return arg_error;
+}
+cl_mem sb_clCreateBuffer ( cl_context context, cl_mem_flags flags, size_t size, void *host_ptr )
+{
+  cl_int buffer_error_code;
+  cl_mem mem_object;
+
+  mem_object = clCreateBuffer (context, flags, size, host_ptr, &buffer_error_code);
+  if (mem_object == NULL) {
+    cerr << "Failed to wrap kernel arg in memory buffer object " << endl;
+    switch (buffer_error_code) {
+      ERROR_CASE (CL_INVALID_CONTEXT,
+		  "if context is not a valid context..");
+      ERROR_CASE (CL_INVALID_VALUE,
+		  "if values specified in flags are not valid.");
+      ERROR_CASE (CL_INVALID_BUFFER_SIZE, 
+		  "if size is 0 or is greater than CL_DEVICE_MAX_MEM_ALLOC_SIZE value specified in table of OpenCL Device Queries for clGetDeviceInfo for all devices in context.");
+      ERROR_CASE (CL_INVALID_HOST_PTR,
+		  "if host_ptr is NULL and CL_MEM_USE_HOST_PTR or CL_MEM_COPY_HOST_PTR are set in flags or if host_ptr is not NULL but CL_MEM_COPY_HOST_PTR or CL_MEM_USE_HOST_PTR are not set in flags.");
+      ERROR_CASE (CL_MEM_OBJECT_ALLOCATION_FAILURE,
+		  "if there is a failure to allocate memory for buffer object.");
+      ERROR_CASE (CL_OUT_OF_HOST_MEMORY,
+		  "if there is a failure to allocate resources required by the OpenCL implementation on the host.");
+    default:
+      cerr << "Unknown error" << endl;
+      break;
+    }
+  }
+  return mem_object;
 }

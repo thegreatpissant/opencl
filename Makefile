@@ -1,4 +1,4 @@
-all: ch2 chp2_platforms
+all: chp2_platforms
 
 
 sb_opencl.o: sb_opencl.h sb_opencl.cpp

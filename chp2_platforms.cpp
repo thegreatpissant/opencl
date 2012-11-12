@@ -55,7 +55,7 @@ int main ()
   /*
    * Step 2, get devices
    */
-  if ( clGetDeviceIDs ( platforms[platform_id], CL_DEVICE_TYPE_ALL, NULL, NULL, &num_devices) < 0 ) {
+  if ( clGetDeviceIDs ( platforms[platform_id], CL_DEVICE_TYPE_ALL, 0, NULL, &num_devices) < 0 ) {
     cerr << "Could not query any devices for platform." << endl;
     EXIT_FAIL;
   }
@@ -98,7 +98,7 @@ int main ()
   /*
    * Step 4, The Program
    */
-  char * fname = "cl3.cl";
+  char fname[] = "cl3.cl";
   std::string * fbuffer = new std::string;
   size_t program_size;
   cl_program program;
@@ -140,22 +140,43 @@ int main ()
   /*
    * Step 7, set the args
    */
-  cl_float a1 = 3, a2 = 2, a3 = 1;
-
-  if (sb_clSetKernelArg (kernel, 0, sizeof (cl_float), &a1) != CL_SUCCESS) {
+  //  Declare the data
+  cl_float a = 3, b = 2, c = 0;
+  cl_mem ka, kb, kc;
+  cl_int buffer_error_code;
+  //  Wrap the data
+  ka = sb_clCreateBuffer (context, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR,
+			  sizeof (cl_float), &a);
+  if (ka == NULL) {
+    cerr << "Failed to wrap arg a" << endl;
+  }
+  kb = sb_clCreateBuffer (context, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR,
+			  sizeof (cl_float), &b);
+  if (kb == NULL) {
+    cerr << "Failed to wrap arg b" << endl;
+  }
+  kc = sb_clCreateBuffer (context, CL_MEM_WRITE_ONLY, sizeof (cl_float), NULL);
+  if (kc == NULL) {
+    cerr << "Failed to wrap arg c" << endl;
+  }
+  if (ka == NULL || kb == NULL || kc == NULL) {
+    EXIT_FAIL;
+  }
+  
+  if (sb_clSetKernelArg (kernel, 0, sizeof (cl_mem), &ka) != CL_SUCCESS) {
     cerr << "Failed to set kernel arg 0" << endl;
     EXIT_FAIL;
   }
-  if (sb_clSetKernelArg (kernel, 1, sizeof (cl_float), &a2) != CL_SUCCESS) {
+  if (sb_clSetKernelArg (kernel, 1, sizeof (cl_mem), &kb) != CL_SUCCESS) {
     cerr << "Failed to set kernel arg 1" << endl;
     EXIT_FAIL;
   }  
-  if (sb_clSetKernelArg (kernel, 2, sizeof (cl_float), &a3) != CL_SUCCESS) {
+  if (sb_clSetKernelArg (kernel, 2, sizeof (cl_mem), &kc) != CL_SUCCESS) {
     cerr << "Failed to set kernel arg 2" << endl;
     EXIT_FAIL;
   }
 
-  /*es
+  /*
    * Step 8, Enque the kernel
    */
   cl_int task_error;
@@ -165,6 +186,8 @@ int main ()
     cout << "Kernel was enqueued" << endl;
   }
 
+  cout << "C is now: " << c << endl;
+  cout << "kc is now: " << kc << endl;
   clReleaseCommandQueue (command_queue);
   clReleaseKernel  (kernel);
   clReleaseProgram (program);

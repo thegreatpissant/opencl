@@ -811,7 +811,7 @@ clCreateKernelsInProgram(cl_program program, cl_uint num_kernels,
 | CL_KERNEL_CONTEXT         | cl_context  | Returns the context associated with the kernel                                     |
 | CL_KERNEL_PROGRAM         | cl_program  | Returns the program from which the kernel was created                              |
 |---------------------------+-------------+------------------------------------------------------------------------------------|
-
+    
 
 * Command Queues
 
@@ -857,6 +857,39 @@ clCreateKernelsInProgram(cl_program program, cl_uint num_kernels,
    #+END_SRC
 
    This will then go to the device when its time is the queue comes up.
+
+
+* Data to and From Kernels
+
+** Kernel Arguments
+
+   #+BEGIN_SRC c
+     cl_int clSetKernelArg ( cl_kernel kernel,
+			     cl_uint arg_index,
+			     size_t arg_size,
+			     const void *arg_value);
+   #+END_SRC
+
+   See the [[https://www.khronos.org/registry/cl/sdk/1.1/docs/man/xhtml/clSetKernelArg.html][sdk_doc]] for access to the complete explanation,  in short
+   they are.
+
+   - cl_kernel:kernel
+
+     Kernel to pass the arguments too.
+
+   - cl_uint:arg_index
+
+     Index of argument passed to the kernel this is going to.
+     ex =my_kernel_func (float arg0, int arg1)=
+
+   - size_t:arg_size
+
+     The allocated size of the object being passed.  Cannot exceed
+     CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE
+
+   - const void :*arg_value
+
+     Pointer to data being passed
 
 
 * Platform Specific Notes

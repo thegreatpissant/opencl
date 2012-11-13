@@ -162,7 +162,7 @@ int main ()
   if (ka == NULL || kb == NULL || kc == NULL) {
     EXIT_FAIL;
   }
-  
+
   if (sb_clSetKernelArg (kernel, 0, sizeof (cl_mem), &ka) != CL_SUCCESS) {
     cerr << "Failed to set kernel arg 0" << endl;
     EXIT_FAIL;
@@ -184,6 +184,15 @@ int main ()
     EXIT_FAIL;
   } else {
     cout << "Kernel was enqueued" << endl;
+  }
+
+  /*
+   *  Step 9, Read back our data
+   */
+  cl_int buffer_read_error;
+
+  if (sb_clEnqueueReadBuffer (command_queue, kc, CL_TRUE, 0, sizeof (cl_float), &c, 0, NULL, NULL) != CL_SUCCESS) {
+    cerr << "Failed to enque readbuffer for c." << endl;
   }
 
   cout << "C is now: " << c << endl;

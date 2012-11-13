@@ -18,4 +18,5 @@ cl_command_queue sb_clCreateCommandQueue (cl_context context , cl_device_id devi
 cl_int sb_clEnqueueTask ( cl_command_queue command_queue, cl_kernel kernel, cl_uint num_events_in_wait_list, const cl_event *event_wait_list, cl_event *event);
 cl_int sb_clSetKernelArg (cl_kernel kernel, cl_uint arg_index, size_t arg_size, const void *arg_value);
 cl_mem sb_clCreateBuffer ( cl_context context, cl_mem_flags flags, size_t size, void *host_ptr );
+cl_int sb_clEnqueueReadBuffer (cl_command_queue command_queue, cl_mem buffer, cl_bool blocking_read, size_t offset, size_t cb, void *ptr, cl_uint num_events_in_wait_list, const cl_event *event_wait_list, cl_event *event);
 #endif

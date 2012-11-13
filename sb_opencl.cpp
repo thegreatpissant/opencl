@@ -428,3 +428,52 @@ cl_mem sb_clCreateBuffer ( cl_context context, cl_mem_flags flags, size_t size, 
   }
   return mem_object;
 }
+
+cl_int sb_clEnqueueReadBuffer (cl_command_queue command_queue,
+			       cl_mem buffer,
+			       cl_bool blocking_read,
+			       size_t offset,
+			       size_t cb,
+			       void *ptr,
+			       cl_uint num_events_in_wait_list,
+			       const cl_event *event_wait_list,
+			       cl_event *event)
+{
+
+  cl_int read_buffer_ret;
+  read_buffer_ret = clEnqueueReadBuffer (command_queue, buffer, blocking_read, offset, cb, ptr,
+		       num_events_in_wait_list, event_wait_list, event);
+
+  if (read_buffer_ret != CL_SUCCESS) {
+    cerr << "Error Enqueuing buffer to read. " << endl;
+
+    switch (read_buffer_ret) {
+      
+      ERROR_CASE (CL_INVALID_COMMAND_QUEUE,
+		 "if command_queue is not a valid command-queue.");
+      ERROR_CASE (CL_INVALID_CONTEXT,
+		 "if the context associated with command_queue and buffer are not the same or if the context associated with command_queue and events in event_wait_list are not the same.");
+      ERROR_CASE (CL_INVALID_MEM_OBJECT,
+		 "if buffer is not a valid buffer object.");
+      ERROR_CASE (CL_INVALID_VALUE,
+		 "if the region being read specified by (offset, cb) is out of bounds or if ptr is a NULL value.");
+      ERROR_CASE (CL_INVALID_EVENT_WAIT_LIST,
+		 "if event_wait_list is NULL and num_events_in_wait_list greater than 0, or event_wait_list is not NULL and num_events_in_wait_list is 0, or if event objects in event_wait_list are not valid events.");
+      ERROR_CASE (CL_MISALIGNED_SUB_BUFFER_OFFSET,
+		 "if buffer is a sub-buffer object and offset specified when the sub-buffer object is created is not aligned to CL_DEVICE_MEM_BASE_ADDR_ALIGN value for device associated with queue.");
+      ERROR_CASE (CL_EXEC_STATUS_ERROR_FOR_EVENTS_IN_WAIT_LIST,
+		 "if the read and write operations are blocking and the execution status of any of the events in event_wait_list is a negative integer value.");
+      ERROR_CASE (CL_MEM_OBJECT_ALLOCATION_FAILURE,
+		 "if there is a failure to allocate memory for data store associated with buffer.");
+      ERROR_CASE (CL_OUT_OF_RESOURCES,
+		 "if there is a failure to allocate resources required by the OpenCL implementation on the device.");
+      ERROR_CASE (CL_OUT_OF_HOST_MEMORY,
+		 "if there is a failure to allocate resources required by the OpenCL implementation on the host.");
+    default:
+      cerr << "Unknown error occured" << endl;
+      break;
+    }
+  }
+
+  return read_buffer_ret;
+}

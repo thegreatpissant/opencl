@@ -892,6 +892,145 @@ clCreateKernelsInProgram(cl_program program, cl_uint num_kernels,
      Pointer to data being passed
 
 
+** Buffer objects
+
+   Buffers and subbuffers may be created to hold data transfered to
+   and from a kernel.  To create a Buffer Object use the
+   =clCreateBuffer= function
+#+begin_src c++
+  clCreateBuffer (cl_context context, 
+                  cl_mem_flags options, size_t size,
+                  void *host_ptr, cl_int *error);
+#+end_src
+
+   + =context=: A valid OpenCL context used to create the buffer object.
+
+   + =flags=: A bit-field that is used to specify allocation and usage
+     information such as the memory arena that should be used to
+     allocate the buffer object and how it will be used. The following
+     table describes the possible values for flags:
+
+     - =cl_mem_flags=: Description
+     - =CL_MEM_READ_WRITE=: This flag specifies that the memory object
+       will be read and written by a kernel. This is the default.
+     - =CL_MEM_WRITE_ONLY=: This flags specifies that the memory object
+       will be written but not read by a kernel. Reading from a buffer
+       or image object created with CL_MEM_WRITE_ONLY inside a kernel
+       is undefined.
+
+     - =CL_MEM_READ_ONLY=: This flag specifies that the memory object is
+       a read-only memory object when used inside a kernel. Writing to
+       a buffer or image object created with CL_MEM_READ_ONLY inside a
+       kernel is undefined.
+
+     - =CL_MEM_USE_HOST_PTR=: This flag is valid only if host_ptr is not
+       NULL. If specified, it indicates that the application wants the
+       OpenCL implementation to use memory referenced by host_ptr as
+       the storage bits for the memory object. OpenCL implementations
+       are allowed to cache the buffer contents pointed to by host_ptr
+       in device memory. This cached copy can be used when kernels are
+       executed on a device. The result of OpenCL commands that
+       operate on multiple buffer objects created with the same
+       host_ptr or overlapping host regions is considered to be
+       undefined.
+
+     - =CL_MEM_ALLOC_HOST_PTR=: This flag specifies that the application
+       wants the OpenCL implementation to allocate memory from host
+       accessible memory. CL_MEM_ALLOC_HOST_PTR and
+       CL_MEM_USE_HOST_PTR are mutually exclusive.
+
+     - =CL_MEM_COPY_HOST_PTR=: This flag is valid only if host_ptr is not
+       NULL. If specified, it indicates that the application wants the
+       OpenCL implementation to allocate memory for the memory object
+       and copy the data from memory referenced by
+       host_ptr. CL_MEM_COPY_HOST_PTR and CL_MEM_USE_HOST_PTR are
+       mutually exclusive.
+
+     - =CL_MEM_COPY_HOST_PTR=: can be used with CL_MEM_ALLOC_HOST_PTR to
+       initialize the contents of the cl_mem object allocated using
+       host-accessible (e.g. PCIe) memory. size The size in bytes of
+       the buffer memory object to be allocated.
+
+   + =host_ptr=: A pointer to the buffer data that may already be
+     allocated by the application. The size of the buffer that
+     host_ptr points to must be greater than or equal to the size
+     bytes.
+
+   + =errcode_ret=: Returns an appropriate error code. If errcode_ret
+     is NULL, no error code is returned.
+
+   You can also create a sub buffer using =clCreateSubBuffer= from the buffer object as well,
+   the arguments stand the same as a buffer. 
+#+begin_src c++
+  clCreateSubBuffer(cl_mem buffer,
+                    cl_mem_flags flags, 
+                    cl_buffer_create_type type,
+                    const void *info, cl_int *error);
+#+end_src
+
+   The main difference is the =info= field.  Although here a =void*=
+   it is of the following type.
+#+begin_src c++
+  typedef struct _cl_buffer_region {
+    size_t origin;
+    size_t size;
+  } cl_buffer_region;
+#+end_src
+
+   =origin= specifies the offset in size of the type into the buffer
+   the sub buffer begins.  and =size= specifies the size in the size
+   of the type of how big it is.
+
+   An example from the book [fn:1]
+
+#+begin_src c++
+
+  cl_buffer_region region;
+  region.size = 40*sizeof(float);
+  region.origin = 50*sizeof(float);
+  sub_buffer = clCreateSubBuffer(main_buffer, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
+                                 CL_BUFFER_CREATE_TYPE_REGION, 
+                                 &region, &err);
+
+#+end_src
+
+   
+** Image Objects
+   
+   Image objects are created as 2D or 3D using =clCreateImage2D= and
+   =clCreateImage3D=.  
+   The function signatures are as follows:
+
+#+begin_src c++
+
+  clCreateImage2D (cl_context context, cl_mem_flags opts,
+                   const cl_image_format *format, size_t width, size_t height,
+                   size_t row_pitch, void *data, cl_int *error)
+  
+  clCreateImage3D (cl_context context, cl_mem_flags opts,
+                   const cl_image_format *format, size_t width, size_t height,
+                   size_t depth, size_t row_pitch, size_t slice_pitch,
+                   void *data, cl_int *error)
+
+#+end_src
+
+   The =context= and =opts= arguments are the same as the other buffer
+   objects.  While =format= is a struct that specifies how the image
+   is stored in memory.
+
+#+begin_src c++
+  
+  typedef struct _cl_image_format {
+    cl_channel_order image_channel_order;
+    cl_channel_type image_channel_data_type;
+  } cl_image_format;
+
+#+end_src 
+   see section 3.3.1 in [fn.1] for a discussion on the specifics of
+   describing how your image data would be represented.  I would copy
+   it verbatium, and would not serve any purpose to do that.
+
+
 * Platform Specific Notes
 
 ** Intel

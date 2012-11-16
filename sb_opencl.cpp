@@ -15,6 +15,11 @@ using std::string;
   cerr << ERROR_MESSAGE << endl;	       \
   break					       \
 
+#define INFO_CASE(SWITCH_CASE, INFO_MESSAGE) \
+  case SWITCH_CASE:			       \
+  cerr << INFO_MESSAGE << endl;		       \
+  break					       \
+
 
 void sb_clPrintPlatformExtension ( cl_platform_id * platform, cl_int extension );
 
@@ -190,9 +195,11 @@ cl_int sb_clBuildProgram ( cl_program * program,
   case CL_INVALID_BUILD_OPTIONS:
     cerr << "Error: Invalid build options." << endl;
     break;
-    //  case CL_INVALID_OPERATION:
-    //    cerr << "Error: Program build did not complete." << endl;
-    //    break;
+    /* @@TODO
+      case CL_INVALID_OPERATION:
+        cerr << "Error: Program build did not complete." << endl;
+        break;
+    */
   case CL_COMPILER_NOT_AVAILABLE:
     cerr << "Error: Source compilation not available for device." << endl;
     break;
@@ -336,9 +343,11 @@ cl_int sb_clEnqueueTask ( cl_command_queue command_queue, cl_kernel kernel, cl_u
     case CL_INVALID_WORK_GROUP_SIZE:
       cerr << "A work-group size is specified for kernel using the __attribute__((reqd_work_group_size(X, Y, Z))) qualifier in program source and is not (1, 1, 1)." << endl;
       break;
-      /*  case CL_MISALIGNED_SUB_BUFFER_OFFSET: 
+      /*  @@TODO
+	  case CL_MISALIGNED_SUB_BUFFER_OFFSET: 
 	  cerr << "A sub-buffer object is specified as the value for an argument that is a buffer object and the offset specified when the sub-buffer object is created is not aligned to CL_DEVICE_MEM_BASE_ADDR_ALIGN value for device associated with queue." << endl;
-	  break;*/
+	  break;
+      */
     case CL_INVALID_IMAGE_SIZE:
       cerr << "Image object is specified as an argument value and the image dimensions (image width, height, specified or compute row and/or slice pitch) are not supported by device associated with queue." << endl;
       break;
@@ -476,4 +485,256 @@ cl_int sb_clEnqueueReadBuffer (cl_command_queue command_queue,
   }
 
   return read_buffer_ret;
+}
+
+cl_mem sb_clCreateImage2D (cl_context context, cl_mem_flags flags,
+			   const cl_image_format *image_format,
+			   size_t image_width, size_t image_height,
+			   size_t image_row_pitch,
+			   void *host_ptr)
+{
+
+  cl_int error_2d;
+  cl_mem mem_object;
+
+  mem_object = clCreateImage2D (context, flags, image_format, image_width, image_height,
+				image_row_pitch, host_ptr, &error_2d);
+
+  if (mem_object == NULL) {
+    cerr << "Error createing 2d image memory object" << endl;
+    switch (error_2d) {
+      ERROR_CASE (CL_INVALID_CONTEXT,
+		  "if context is not a valid context.");
+      ERROR_CASE (CL_INVALID_VALUE,
+		  "if values specified in flags are not valid.");
+      ERROR_CASE (CL_INVALID_IMAGE_FORMAT_DESCRIPTOR,
+		  "if values specified in image_format are not valid or if image_format is NULL.");
+      ERROR_CASE (CL_INVALID_IMAGE_SIZE,
+		  " if image_width or image_height are 0 or if they exceed values specified in CL_DEVICE_IMAGE2D_MAX_WIDTH or CL_DEVICE_IMAGE2D_MAX_HEIGHT respectively for all devices in context or if values specified by image_row_pitch do not follow rules described in the argument description above.");
+      ERROR_CASE (CL_INVALID_HOST_PTR,
+		  "if host_ptr is NULL and CL_MEM_USE_HOST_PTR or CL_MEM_COPY_HOST_PTR are set in flags or if host_ptr is not NULL but CL_MEM_COPY_HOST_PTR or CL_MEM_USE_HOST_PTR are not set in flags.");
+      ERROR_CASE (CL_IMAGE_FORMAT_NOT_SUPPORTED,
+		  "if the image_format is not supported.");
+      ERROR_CASE (CL_MEM_OBJECT_ALLOCATION_FAILURE,
+		  " if there is a failure to allocate memory for image object.");
+      ERROR_CASE (CL_INVALID_OPERATION,
+		  "if there are no devices in context that support images (i.e. CL_DEVICE_IMAGE_SUPPORT (specified in the table of OpenCL Device Queries for clGetDeviceInfo) is CL_FALSE).");
+      ERROR_CASE (CL_OUT_OF_RESOURCES,
+		  "if there is a failure to allocate resources required by the OpenCL implementation on the device.");
+      ERROR_CASE (CL_OUT_OF_HOST_MEMORY,
+		  "if there is a failure to allocate resources required by the OpenCL implementation on the host.");
+    default:
+      cerr << "Unknown error" << endl;
+      break;
+    }
+  }
+  return mem_object;
+}
+
+cl_mem sb_clCreateImage2D (cl_context context,
+			   cl_mem_flags flags,
+			   const cl_image_format *image_format,
+			   size_t image_width, size_t image_height, size_t image_depth,
+			   size_t image_row_pitch, size_t image_slice_pitch,
+			   void *host_ptr)
+{
+
+  cl_int error_3d;
+  cl_mem mem_object;
+
+  mem_object = clCreateImage3D (context, flags, image_format, 
+				image_width, image_height, image_depth,
+				image_row_pitch, image_slice_pitch, host_ptr, &error_3d);
+
+  if (mem_object == NULL) {
+    cerr << "Error createing 3d image memory object" << endl;
+    switch (error_3d) {
+      ERROR_CASE (CL_INVALID_CONTEXT,
+		  "if context is not a valid context.");
+      ERROR_CASE (CL_INVALID_VALUE,
+		  "if values specified in flags are not valid.");
+      ERROR_CASE (CL_INVALID_IMAGE_FORMAT_DESCRIPTOR,
+		  "if values specified in image_format are not valid or if image_format is NULL.");
+      ERROR_CASE (CL_INVALID_IMAGE_SIZE,
+		  " if image_width or image_height are 0 or if they exceed values specified in CL_DEVICE_IMAGE2D_MAX_WIDTH or CL_DEVICE_IMAGE2D_MAX_HEIGHT respectively for all devices in context or if values specified by image_row_pitch do not follow rules described in the argument description above.");
+      ERROR_CASE (CL_INVALID_HOST_PTR,
+		  "if host_ptr is NULL and CL_MEM_USE_HOST_PTR or CL_MEM_COPY_HOST_PTR are set in flags or if host_ptr is not NULL but CL_MEM_COPY_HOST_PTR or CL_MEM_USE_HOST_PTR are not set in flags.");
+      ERROR_CASE (CL_IMAGE_FORMAT_NOT_SUPPORTED,
+		  "if the image_format is not supported.");
+      ERROR_CASE (CL_MEM_OBJECT_ALLOCATION_FAILURE,
+		  " if there is a failure to allocate memory for image object.");
+      ERROR_CASE (CL_INVALID_OPERATION,
+		  "if there are no devices in context that support images (i.e. CL_DEVICE_IMAGE_SUPPORT (specified in the table of OpenCL Device Queries for clGetDeviceInfo) is CL_FALSE).");
+      ERROR_CASE (CL_OUT_OF_RESOURCES,
+		  "if there is a failure to allocate resources required by the OpenCL implementation on the device.");
+      ERROR_CASE (CL_OUT_OF_HOST_MEMORY,
+		  "if there is a failure to allocate resources required by the OpenCL implementation on the host.");
+    default:
+      cerr << "Unknown error" << endl;
+      break;
+    }
+  }
+  return mem_object;
+}
+
+static void sb_print_clGetImageInfoError (cl_int image_info_error);
+static void sb_print_cl_image_format (cl_image_format *image_format);
+
+cl_int sb_clGetImageInfo (cl_mem image, size_t param_value_size, void *param_value)
+{
+  cl_int info_ret;
+
+  //  CL_IMAGE_FORMAT
+  cl_image_format image_format;
+  info_ret = clGetImageInfo (image, CL_IMAGE_FORMAT, 
+			     sizeof (cl_image_format), &image_format, NULL);
+  if (info_ret != CL_SUCCESS) 
+    sb_print_clGetImageInfoError (info_ret);
+  else
+    sb_print_cl_image_format (&image_format);
+  
+  //  CL_IMAGE_ELEMENT_SIZE
+  size_t element_size;
+  info_ret = clGetImageInfo (image, CL_IMAGE_ELEMENT_SIZE,
+			     sizeof (size_t), &element_size, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetImageInfoError (info_ret);
+  else
+    cout << "Size of each image element: " << element_size << endl;
+
+  //  CL_IMAGE_ROW_PITCH
+  info_ret = clGetImageInfo (image, CL_IMAGE_ROW_PITCH,
+			     sizeof (size_t), &element_size, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetImageInfoError (info_ret);
+  else
+    cout << "Size of row elements: " << element_size << endl;
+
+  //  CL_IMAGE_SLICE_PITCH
+  info_ret = clGetImageInfo (image, CL_IMAGE_SLICE_PITCH,
+			     sizeof (size_t), &element_size, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetImageInfoError (info_ret);
+  else
+    cout << "Size of 2D slice in 3D image: " << element_size << endl; 
+
+  //  CL_IMAGE_WIDTH
+  info_ret = clGetImageInfo (image, CL_IMAGE_WIDTH,
+			     sizeof (size_t), &element_size, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetImageInfoError (info_ret);
+  else
+    cout << "Width of image pixels: " << element_size << endl;
+
+  //  CL_IMAGE_HEIGHT
+  info_ret = clGetImageInfo (image, CL_IMAGE_HEIGHT,
+			     sizeof (size_t), &element_size, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetImageInfoError (info_ret);
+  else
+    cout << "Height of image in pixels: " << element_size << endl;
+
+  //  CL_IMAGE_DEPTH
+  info_ret = clGetImageInfo (image, CL_IMAGE_DEPTH,
+			     sizeof (size_t), &element_size, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetImageInfoError (info_ret);
+  else
+    cout << "Depth of image in pixels: " << element_size << endl;
+
+}
+
+static void sb_print_cl_image_format (cl_image_format *image_format) 
+{
+  cout << "Image format " << endl;
+  cout << "channel_order " << endl;
+  switch (image_format->image_channel_order) {
+  case CL_R:
+  case CL_Rx:
+  case CL_A:
+    cout << "CL_R, CL_Rx, CL_A " << endl;
+    break;
+  case CL_INTENSITY:
+    cout << "CL_INTENSITY" << endl;
+    break;
+  case CL_LUMINANCE :
+    cout << "CL_LUMINANCE" << endl;
+    break;
+  case CL_RG:
+  case CL_RGx:
+  case CL_RA:
+    cout << "CL_RG, CL_RGx, CL_RA" << endl;
+    break;
+  case CL_RGB:
+  case CL_RGBx:
+    cout << "CL_RGB, CL_RGBx" << endl;
+    break;
+  case CL_RGBA:
+    cout << "CL_RGBA" << endl;
+    break;
+  case CL_ARGB:
+  case CL_BGRA:
+    cout << "CL_ARGB, CL_BRGA" << endl;
+    break;
+  default:
+    break;
+  }
+
+  cout << "size of channel data type" << endl;
+
+  switch (image_format->image_channel_data_type) {
+    INFO_CASE (CL_SNORM_INT8,
+	       "Each channel component is a normalized signed 8-bit integer value.");
+    INFO_CASE (CL_SNORM_INT16,
+	       "Each channel component is a normalized signed 16-bit integer value.");
+    INFO_CASE (CL_UNORM_INT8,
+	       "Each channel component is a normalized unsigned 8-bit integer value.");
+    INFO_CASE (CL_UNORM_INT16,
+	       "Each channel component is a normalized unsigned 16-bit integer value.");
+    INFO_CASE (CL_UNORM_SHORT_565,
+	       "Represents a normalized 5-6-5 3-channel RGB image. The channel order must be CL_RGB.");
+    INFO_CASE (CL_UNORM_SHORT_555,
+	       "Represents a normalized x-5-5-5 4-channel xRGB image. The channel order must be CL_RGB.");
+    INFO_CASE (CL_UNORM_INT_101010,
+	       "Represents a normalized x-10-10-10 4-channel xRGB image. The channel order must be CL_RGB.");
+    INFO_CASE (CL_SIGNED_INT8,
+	       "Each channel component is an unnormalized signed 8-bit integer value.");
+    INFO_CASE (CL_SIGNED_INT16,
+	       "Each channel component is an unnormalized signed 16-bit integer value.");
+    INFO_CASE (CL_SIGNED_INT32,
+	       "Each channel component is an unnormalized signed 32-bit integer value.");
+    INFO_CASE (CL_UNSIGNED_INT8,
+	       "Each channel component is an unnormalized unsigned 8-bit integer value.");
+    INFO_CASE (CL_UNSIGNED_INT16,
+	       "Each channel component is an unnormalized unsigned 16-bit integer value.");
+    INFO_CASE (CL_UNSIGNED_INT32,
+	       "Each channel component is an unnormalized unsigned 32-bit integer value.");
+    INFO_CASE (CL_HALF_FLOAT,
+	       "Each channel component is a 16-bit half-float value.");
+    INFO_CASE (CL_FLOAT,
+	       "Each channel component is a single precision floating-point value.");
+  default:
+    break;
+  }
+
+}
+static void sb_print_clGetImageInfoError (cl_int image_info_error) 
+{
+  switch (image_info_error) {
+    ERROR_CASE (CL_INVALID_MEM_OBJECT,
+		"if image is a not a valid image object.");
+    ERROR_CASE (CL_INVALID_VALUE,
+		"if param_name is not valid, or if size in bytes specified by param_value_size is less than the size of return type as described in the table above and param_value is not NULL.");
+    /* @@TODO
+      ERROR_CASE (CL_INVALID_D3D10_RESOURCE_KHR,
+		"if param_name is CL_MEM_D3D10_SUBRESOURCE_KHR and image was not created by the function clCreateFromD3D10Texture2DKHR or clCreateFromD3D10Texture3DKHR.");
+    */
+    ERROR_CASE (CL_OUT_OF_RESOURCES,
+		"if there is a failure to allocate resources required by the OpenCL implementation on the device.");
+    ERROR_CASE (CL_OUT_OF_HOST_MEMORY,
+		"if there is a failure to allocate resources required by the OpenCL implementation on the host.");
+  default:
+    cerr << "Unknown error" << endl;
+    break;
+  }
 }

@@ -21,5 +21,6 @@ cl_mem sb_clCreateBuffer ( cl_context context, cl_mem_flags flags, size_t size, 
 cl_int sb_clEnqueueReadBuffer (cl_command_queue command_queue, cl_mem buffer, cl_bool blocking_read, size_t offset, size_t cb, void *ptr, cl_uint num_events_in_wait_list, const cl_event *event_wait_list, cl_event *event);
 cl_mem sb_clCreateImage2D (cl_context context, cl_mem_flags flags, const cl_image_format *image_format, size_t image_width, size_t image_height, size_t image_row_pitch, void *host_ptr);
 cl_mem sb_clCreateImage3D (cl_context context, cl_mem_flags flags, const cl_image_format *image_format, size_t image_width, size_t image_height, size_t image_row_pitch, void *host_ptr);
-cl_int sb_clGetImageInfo (cl_mem image, size_t param_value_size, void *param_value, size_t *param_value_size_ret);
+cl_int sb_clGetImageInfo (cl_mem image);
+void sb_clGetMemObjectInfo (cl_mem object);
 #endif

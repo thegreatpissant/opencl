@@ -188,11 +188,12 @@ cl_int sb_clBuildProgram ( cl_program * program,
 		"Error: Ivalid Binary for devices.");
     ERROR_CASE (CL_INVALID_BUILD_OPTIONS,
 		"Error: Invalid build options.");
-    /* @@TODO
+    //  @@TODO: Why is this a duplicate define?
+#ifndef  CL_INVALID_OPERATION
       case CL_INVALID_OPERATION:
         cerr << "Error: Program build did not complete." << endl;
         break;
-    */
+#endif
     ERROR_CASE (CL_COMPILER_NOT_AVAILABLE,
 		"Error: Source compilation not available for device.");
     ERROR_CASE (CL_BUILD_PROGRAM_FAILURE,
@@ -311,11 +312,11 @@ cl_int sb_clEnqueueTask ( cl_command_queue command_queue, cl_kernel kernel, cl_u
 		  "The kernel argument values have not been specified.");
       ERROR_CASE (CL_INVALID_WORK_GROUP_SIZE,
 		  "A work-group size is specified for kernel using the __attribute__((reqd_work_group_size(X, Y, Z))) qualifier in program source and is not (1, 1, 1).");
-      /*  @@TODO
+#ifdef CL_MISALIGNED_SUB_BUFFER_OFFSET
 	  case CL_MISALIGNED_SUB_BUFFER_OFFSET: 
 	  cerr << "A sub-buffer object is specified as the value for an argument that is a buffer object and the offset specified when the sub-buffer object is created is not aligned to CL_DEVICE_MEM_BASE_ADDR_ALIGN value for device associated with queue." << endl;
 	  break;
-      */
+#endif
       ERROR_CASE (CL_INVALID_IMAGE_SIZE,
 		  "Image object is specified as an argument value and the image dimensions (image width, height, specified or compute row and/or slice pitch) are not supported by device associated with queue.");
       ERROR_CASE (CL_OUT_OF_RESOURCES,
@@ -540,10 +541,10 @@ cl_mem sb_clCreateImage2D (cl_context context,
   return mem_object;
 }
 
-static void sb_print_clGetImageInfoError (cl_int image_info_error);
+static void sb_print_clGetInfoError (cl_int image_info_error);
 static void sb_print_cl_image_format (cl_image_format *image_format);
 
-cl_int sb_clGetImageInfo (cl_mem image, size_t param_value_size, void *param_value)
+cl_int sb_clGetImageInfo (cl_mem image)
 {
   cl_int info_ret;
 
@@ -552,7 +553,7 @@ cl_int sb_clGetImageInfo (cl_mem image, size_t param_value_size, void *param_val
   info_ret = clGetImageInfo (image, CL_IMAGE_FORMAT, 
 			     sizeof (cl_image_format), &image_format, NULL);
   if (info_ret != CL_SUCCESS) 
-    sb_print_clGetImageInfoError (info_ret);
+    sb_print_clGetInfoError (info_ret);
   else
     sb_print_cl_image_format (&image_format);
   
@@ -561,7 +562,7 @@ cl_int sb_clGetImageInfo (cl_mem image, size_t param_value_size, void *param_val
   info_ret = clGetImageInfo (image, CL_IMAGE_ELEMENT_SIZE,
 			     sizeof (size_t), &element_size, NULL);
   if (info_ret != CL_SUCCESS)
-    sb_print_clGetImageInfoError (info_ret);
+    sb_print_clGetInfoError (info_ret);
   else
     cout << "Size of each image element: " << element_size << endl;
 
@@ -569,7 +570,7 @@ cl_int sb_clGetImageInfo (cl_mem image, size_t param_value_size, void *param_val
   info_ret = clGetImageInfo (image, CL_IMAGE_ROW_PITCH,
 			     sizeof (size_t), &element_size, NULL);
   if (info_ret != CL_SUCCESS)
-    sb_print_clGetImageInfoError (info_ret);
+    sb_print_clGetInfoError (info_ret);
   else
     cout << "Size of row elements: " << element_size << endl;
 
@@ -577,7 +578,7 @@ cl_int sb_clGetImageInfo (cl_mem image, size_t param_value_size, void *param_val
   info_ret = clGetImageInfo (image, CL_IMAGE_SLICE_PITCH,
 			     sizeof (size_t), &element_size, NULL);
   if (info_ret != CL_SUCCESS)
-    sb_print_clGetImageInfoError (info_ret);
+    sb_print_clGetInfoError (info_ret);
   else
     cout << "Size of 2D slice in 3D image: " << element_size << endl; 
 
@@ -585,7 +586,7 @@ cl_int sb_clGetImageInfo (cl_mem image, size_t param_value_size, void *param_val
   info_ret = clGetImageInfo (image, CL_IMAGE_WIDTH,
 			     sizeof (size_t), &element_size, NULL);
   if (info_ret != CL_SUCCESS)
-    sb_print_clGetImageInfoError (info_ret);
+    sb_print_clGetInfoError (info_ret);
   else
     cout << "Width of image pixels: " << element_size << endl;
 
@@ -593,7 +594,7 @@ cl_int sb_clGetImageInfo (cl_mem image, size_t param_value_size, void *param_val
   info_ret = clGetImageInfo (image, CL_IMAGE_HEIGHT,
 			     sizeof (size_t), &element_size, NULL);
   if (info_ret != CL_SUCCESS)
-    sb_print_clGetImageInfoError (info_ret);
+    sb_print_clGetInfoError (info_ret);
   else
     cout << "Height of image in pixels: " << element_size << endl;
 
@@ -601,7 +602,7 @@ cl_int sb_clGetImageInfo (cl_mem image, size_t param_value_size, void *param_val
   info_ret = clGetImageInfo (image, CL_IMAGE_DEPTH,
 			     sizeof (size_t), &element_size, NULL);
   if (info_ret != CL_SUCCESS)
-    sb_print_clGetImageInfoError (info_ret);
+    sb_print_clGetInfoError (info_ret);
   else
     cout << "Depth of image in pixels: " << element_size << endl;
 
@@ -681,17 +682,17 @@ static void sb_print_cl_image_format (cl_image_format *image_format)
   }
 
 }
-static void sb_print_clGetImageInfoError (cl_int image_info_error) 
+static void sb_print_clGetInfoError (cl_int image_info_error) 
 {
   switch (image_info_error) {
     ERROR_CASE (CL_INVALID_MEM_OBJECT,
-		"if image is a not a valid image object.");
+		"if is a not a valid object.");
     ERROR_CASE (CL_INVALID_VALUE,
 		"if param_name is not valid, or if size in bytes specified by param_value_size is less than the size of return type as described in the table above and param_value is not NULL.");
-    /* @@TODO
+#ifdef CL_INVALID_D3D10_RESOURCE_KHR
       ERROR_CASE (CL_INVALID_D3D10_RESOURCE_KHR,
 		"if param_name is CL_MEM_D3D10_SUBRESOURCE_KHR and image was not created by the function clCreateFromD3D10Texture2DKHR or clCreateFromD3D10Texture3DKHR.");
-    */
+#endif
     ERROR_CASE (CL_OUT_OF_RESOURCES,
 		"if there is a failure to allocate resources required by the OpenCL implementation on the device.");
     ERROR_CASE (CL_OUT_OF_HOST_MEMORY,
@@ -700,4 +701,76 @@ static void sb_print_clGetImageInfoError (cl_int image_info_error)
     cerr << "Unknown error" << endl;
     break;
   }
+}
+
+void sb_clGetMemObjectInfo (cl_mem object)
+{
+  
+  cl_int info_ret;
+
+  cl_mem_object_type obj_type;
+
+  info_ret = clGetMemObjectInfo (object, CL_MEM_TYPE, sizeof (cl_mem_object_type), &obj_type, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetInfoError (info_ret);
+  else				 
+    switch (obj_type) {
+      INFO_CASE (CL_MEM_OBJECT_BUFFER, "CL_MEM_OBJECT_BUFFER");
+      INFO_CASE (CL_MEM_OBJECT_IMAGE2D, "CL_MEM_OBJECT_IMAGE2D");
+      INFO_CASE (CL_MEM_OBJECT_IMAGE3D, "CL_MEM_OBJECT_IMAGE3D");
+    default: cout << "Unknown object type" << endl;
+      break;
+    }
+
+  cl_mem_flags mem_flags;
+  info_ret = clGetMemObjectInfo (object, CL_MEM_FLAGS, sizeof (cl_mem_flags), &mem_flags, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetInfoError (info_ret);
+  else
+    cout << "MemFlags: " << mem_flags << endl;
+
+  void * host_pointer;
+  info_ret = clGetMemObjectInfo (object, CL_MEM_HOST_PTR, sizeof (void*), &host_pointer, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetInfoError (info_ret);
+  else
+    cout << "Host pointer: " << host_pointer << endl;
+  
+  size_t mem_size;
+  info_ret = clGetMemObjectInfo (object, CL_MEM_SIZE, sizeof (size_t), &mem_size, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetInfoError (info_ret);
+  else
+    cout << "Mem size: " << mem_size << endl;
+  
+  cl_context context;
+  info_ret = clGetMemObjectInfo (object, CL_MEM_CONTEXT, sizeof (cl_context), &context, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetInfoError (info_ret);
+  else
+    cout << "Mem Context: " << context << endl;
+
+  size_t mem_offset;
+  info_ret = clGetMemObjectInfo (object, CL_MEM_OFFSET, sizeof (size_t), &mem_offset, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetInfoError (info_ret);
+  else
+    cout << "Mem offset: " << mem_offset << endl;  
+
+  cl_uint ref_count;
+  info_ret = clGetMemObjectInfo (object, CL_MEM_REFERENCE_COUNT, sizeof (cl_uint), &ref_count, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetInfoError (info_ret);
+  else
+    cout << "Memory objects Reference count: " << ref_count << endl;  
+
+#ifdef CL_MEM_D3D10_RESOURCE_KHR
+  ID3D10Resource * d3dresource;
+  info_ret = clGetMemObjectInfo (object,  CL_MEM_D3D10_RESOURCE_KHR, sizeof (ID3D10Resource), &d3dresource, NULL);
+  if (info_ret != CL_SUCCESS)
+    sb_print_clGetInfoError (info_ret);
+  else
+    cout << "D3DResource: " << d3dresource << endl;  
+#endif
+
 }

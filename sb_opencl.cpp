@@ -17,7 +17,7 @@ using std::string;
 
 #define INFO_CASE(SWITCH_CASE, INFO_MESSAGE) \
   case SWITCH_CASE:			       \
-  cerr << INFO_MESSAGE << endl;		       \
+  cout << INFO_MESSAGE << endl;		       \
   break					       \
 
 
@@ -83,7 +83,7 @@ void sb_clPrintDeviceInfo ( cl_device_id * device )
   cl_uint  qaddress_space = 0;
   cl_bool  qdevice_available = false;
   cl_bool  qdevice_compiler  = false;
-  cl_char * qstring = (cl_char *) malloc (qstring_len+1);
+  cl_char *qstring = (cl_char *) malloc (qstring_len+1);
 
   qstring[qstring_len] = '\0';
 
@@ -147,15 +147,12 @@ cl_program sb_clCreateProgramFromSource ( string * program_buffer, cl_context co
   program = clCreateProgramWithSource (context, 1, (const char **) &source, NULL, &error_code);
   if ( program == NULL || error_code < 0 ) {
     switch (error_code) {
-    case CL_INVALID_CONTEXT :
-      cerr << "Source Program: Invalid Context\n";
-      break;
-    case CL_INVALID_VALUE :
-      cerr << "Source Program: Invalid Value\n";
-      break;
-    case CL_OUT_OF_HOST_MEMORY:
-      cerr << "Source Program: Out of host memory\n";
-      break;
+      ERROR_CASE (CL_INVALID_CONTEXT,
+		  "Source Program: Invalid Context");
+      ERROR_CASE (CL_INVALID_VALUE,
+		  "Source Program: Invalid Value");
+      ERROR_CASE (CL_OUT_OF_HOST_MEMORY,
+		  "Source Program: Out of host memory");
     default:
       cerr << "Source Program: Unknown error\n";
       break;
@@ -180,42 +177,33 @@ cl_int sb_clBuildProgram ( cl_program * program,
   case CL_SUCCESS:
     cout << "Program built without errors." << endl;
     break;
-  case CL_INVALID_PROGRAM:
-    cerr << "Error: Invalid Program Object." << endl;
+    ERROR_CASE (CL_INVALID_PROGRAM,
+		"Error: Invalid Program Object.");
     break;
-  case CL_INVALID_VALUE:
-    cerr << "Error: Invalid Value for devices." << endl;
-    break;
-  case CL_INVALID_DEVICE:
-    cerr << "Error: Invalid device list." << endl;
-    break;
-  case CL_INVALID_BINARY:
-    cerr << "Error: Ivalid Binary for devices." << endl;
-    break;
-  case CL_INVALID_BUILD_OPTIONS:
-    cerr << "Error: Invalid build options." << endl;
-    break;
+    ERROR_CASE (CL_INVALID_VALUE,
+		"Error: Invalid Value for devices.");
+    ERROR_CASE (CL_INVALID_DEVICE,
+		"Error: Invalid device list.");
+    ERROR_CASE (CL_INVALID_BINARY,
+		"Error: Ivalid Binary for devices.");
+    ERROR_CASE (CL_INVALID_BUILD_OPTIONS,
+		"Error: Invalid build options.");
     /* @@TODO
       case CL_INVALID_OPERATION:
         cerr << "Error: Program build did not complete." << endl;
         break;
     */
-  case CL_COMPILER_NOT_AVAILABLE:
-    cerr << "Error: Source compilation not available for device." << endl;
-    break;
-  case CL_BUILD_PROGRAM_FAILURE:
-    cerr << "Error: Failure to build program." << endl;
-    break;
-  case CL_INVALID_OPERATION:
-    cerr << "Error: Kernel objects already attached to program." << endl;
-    break;
-  case CL_OUT_OF_RESOURCES:
-    cerr << "Error: Failure to allocate required resources." << endl;
-    break;
-  case CL_OUT_OF_HOST_MEMORY:
-    cerr << "Error: Failure to allocate memory resources." << endl;
-    break;
-default:
+    ERROR_CASE (CL_COMPILER_NOT_AVAILABLE,
+		"Error: Source compilation not available for device.");
+    ERROR_CASE (CL_BUILD_PROGRAM_FAILURE,
+		"Error: Failure to build program.");
+    ERROR_CASE (CL_INVALID_OPERATION,
+		"Error: Kernel objects already attached to program.");
+    ERROR_CASE (CL_OUT_OF_RESOURCES,
+		"Error: Failure to allocate required resources.");
+    ERROR_CASE (CL_OUT_OF_HOST_MEMORY,
+		"Error: Failure to allocate memory resources.");
+  default:
     cerr << "Error: Unknown error building Program." << endl;
     break;
   }
@@ -253,29 +241,20 @@ cl_kernel sb_clCreateKernel (cl_program program, const char * function_name)
   kernel = clCreateKernel (program, function_name, &kern_error);
   if (kernel == NULL) {
     switch(kern_error) {
-    case CL_INVALID_PROGRAM: 
-      cerr << "Program is not a valid program object." << endl;
-      break;
-    case CL_INVALID_PROGRAM_EXECUTABLE: 
-      cerr << "There is no successfully built executable for program." << endl;
-      break;
-    case CL_INVALID_KERNEL_NAME: 
-      cerr << "kernel_name \"" << function_name << "\" is not found in program." << endl;
-      break;
-    case CL_INVALID_KERNEL_DEFINITION:
-      cerr << "The function definition for __kernel function given by kernel_name such" << endl
-	   << "as the number of arguments, the argument types are not the same for all" << endl
-	   << "devices for which the program executable has been built." << endl;
-      break;
-    case CL_INVALID_VALUE: 
-      cerr << "kernel_name is NULL." << endl;
-      break;
-    case CL_OUT_OF_RESOURCES: 
-      cerr << "Failure to allocate resources required by the OpenCL implementation on the device." << endl;
-      break;
-    case CL_OUT_OF_HOST_MEMORY:
-      cerr << "Failure to allocate resources required by the OpenCL implementation on the host." << endl;
-      break;
+      ERROR_CASE (CL_INVALID_PROGRAM,
+		  "Program is not a valid program object.");
+      ERROR_CASE (CL_INVALID_PROGRAM_EXECUTABLE,
+		  "There is no successfully built executable for program.");
+      ERROR_CASE (CL_INVALID_KERNEL_NAME,
+		   "kernel_name \"" << function_name << "\" is not found in program.");
+      ERROR_CASE (CL_INVALID_KERNEL_DEFINITION,
+		  "The function definition for __kernel function given by kernel_name such as the number of arguments, the argument types are not the same for all devices for which the program executable has been built.");
+      ERROR_CASE (CL_INVALID_VALUE,
+		  "kernel_name is NULL.");
+      ERROR_CASE (CL_OUT_OF_RESOURCES,
+		  "Failure to allocate resources required by the OpenCL implementation on the device.");
+      ERROR_CASE (CL_OUT_OF_HOST_MEMORY,
+		  "Failure to allocate resources required by the OpenCL implementation on the host.");
     default:
       cerr << "Unknown error." << endl;
       break;
@@ -292,24 +271,18 @@ cl_command_queue sb_clCreateCommandQueue (cl_context context , cl_device_id devi
   command_queue = clCreateCommandQueue (context, device, properties, &queue_error);
   if (command_queue == NULL) {
     switch (queue_error) {
-    case CL_INVALID_CONTEXT: 
-      cerr << "Context is not a valid context." << endl;
-      break;
-    case CL_INVALID_DEVICE: 
-      cerr << "Device is not a valid device or is not associated with context." << endl;
-      break;
-    case CL_INVALID_VALUE: 
-      cerr << "Values specified in properties are not valid." << endl;
-      break;
-    case CL_INVALID_QUEUE_PROPERTIES:
-      cerr << "Values specified in properties are valid but are not supported by the device." << endl;
-      break;
-    case CL_OUT_OF_RESOURCES:
-      cerr << "Failure to allocate resources required by the OpenCL implementation on the device." << endl;
-      break;
-    case CL_OUT_OF_HOST_MEMORY: 
-      cerr << "Failure to allocate resources required by the OpenCL implementation on the host." << endl;
-      break;
+      ERROR_CASE (CL_INVALID_CONTEXT,
+		  "Context is not a valid context.");
+      ERROR_CASE (CL_INVALID_DEVICE,
+		  "Device is not a valid device or is not associated with context.");
+      ERROR_CASE (CL_INVALID_VALUE,
+		  "Values specified in properties are not valid.");
+      ERROR_CASE (CL_INVALID_QUEUE_PROPERTIES,
+		  "Values specified in properties are valid but are not supported by the device.");
+      ERROR_CASE  (CL_OUT_OF_RESOURCES,
+		   "Failure to allocate resources required by the OpenCL implementation on the device.");
+      ERROR_CASE (CL_OUT_OF_HOST_MEMORY,
+		  "Failure to allocate resources required by the OpenCL implementation on the host.");
     default:
       cerr << "Unknown error." << endl;;
       break;
@@ -325,44 +298,34 @@ cl_int sb_clEnqueueTask ( cl_command_queue command_queue, cl_kernel kernel, cl_u
   if (task_error != CL_SUCCESS) {
     cerr << "ERROR clEnqueueTask: ";
     switch ( task_error) {
-    case CL_INVALID_PROGRAM_EXECUTABLE: 
-      cerr << "There is no successfully built program executable available for device associated with command_queue. " << endl;
-      break;
-    case CL_INVALID_COMMAND_QUEUE: 
-      cerr << "Command_queue is not a valid command-queue." << endl;
-      break;
-    case CL_INVALID_KERNEL:
-      cerr << "Kernel is not a valid kernel object." << endl;
-      break;
-    case CL_INVALID_CONTEXT:
-      cerr << "Context associated with command_queue and kernel is not the same or if the context associated with command_queue and events in event_wait_list are not the same." << endl;
-      break;
-    case CL_INVALID_KERNEL_ARGS:
-      cerr << "The kernel argument values have not been specified." << endl;
-      break;
-    case CL_INVALID_WORK_GROUP_SIZE:
-      cerr << "A work-group size is specified for kernel using the __attribute__((reqd_work_group_size(X, Y, Z))) qualifier in program source and is not (1, 1, 1)." << endl;
-      break;
+      ERROR_CASE (CL_INVALID_PROGRAM_EXECUTABLE,
+		  "There is no successfully built program executable available for device associated with command_queue. ");
+
+      ERROR_CASE (CL_INVALID_COMMAND_QUEUE,
+		  "Command_queue is not a valid command-queue.");
+      ERROR_CASE (CL_INVALID_KERNEL,
+		  "Kernel is not a valid kernel object.");
+      ERROR_CASE (CL_INVALID_CONTEXT,
+		  "Context associated with command_queue and kernel is not the same or if the context associated with command_queue and events in event_wait_list are not the same.");
+      ERROR_CASE (CL_INVALID_KERNEL_ARGS,
+		  "The kernel argument values have not been specified.");
+      ERROR_CASE (CL_INVALID_WORK_GROUP_SIZE,
+		  "A work-group size is specified for kernel using the __attribute__((reqd_work_group_size(X, Y, Z))) qualifier in program source and is not (1, 1, 1).");
       /*  @@TODO
 	  case CL_MISALIGNED_SUB_BUFFER_OFFSET: 
 	  cerr << "A sub-buffer object is specified as the value for an argument that is a buffer object and the offset specified when the sub-buffer object is created is not aligned to CL_DEVICE_MEM_BASE_ADDR_ALIGN value for device associated with queue." << endl;
 	  break;
       */
-    case CL_INVALID_IMAGE_SIZE:
-      cerr << "Image object is specified as an argument value and the image dimensions (image width, height, specified or compute row and/or slice pitch) are not supported by device associated with queue." << endl;
-      break;
-    case CL_OUT_OF_RESOURCES:
-      cerr << "There is a failure to queue the execution instance of kernel on the command-queue because of insufficient resources needed to execute the kernel." << endl;
-      break;
-    case CL_MEM_OBJECT_ALLOCATION_FAILURE:
-      cerr << "There is a failure to allocate memory for data store associated with image or buffer objects specified as arguments to kernel." << endl;
-      break;
-    case CL_INVALID_EVENT_WAIT_LIST:
-      cerr << "Event_wait_list is NULL and num_events_in_wait_list is greater than 0, or event_wait_list is not NULL and num_events_in_wait_list is 0, or if event objects in event_wait_list are not valid events." << endl;
-      break;
-    case CL_OUT_OF_HOST_MEMORY: 
-      cerr << "There is a failure to allocate resources required by the OpenCL implementation on the host." << endl;
-      break;
+      ERROR_CASE (CL_INVALID_IMAGE_SIZE,
+		  "Image object is specified as an argument value and the image dimensions (image width, height, specified or compute row and/or slice pitch) are not supported by device associated with queue.");
+      ERROR_CASE (CL_OUT_OF_RESOURCES,
+		  "There is a failure to queue the execution instance of kernel on the command-queue because of insufficient resources needed to execute the kernel.");
+      ERROR_CASE (CL_MEM_OBJECT_ALLOCATION_FAILURE,
+		  "There is a failure to allocate memory for data store associated with image or buffer objects specified as arguments to kernel.");
+      ERROR_CASE (CL_INVALID_EVENT_WAIT_LIST,
+		   "Event_wait_list is NULL and num_events_in_wait_list is greater than 0, or event_wait_list is not NULL and num_events_in_wait_list is 0, or if event objects in event_wait_list are not valid events.");
+      ERROR_CASE (CL_OUT_OF_HOST_MEMORY,
+		  "There is a failure to allocate resources required by the OpenCL implementation on the host.");
     default:
       cerr << "Unknown error occured" << endl;
       break;
@@ -378,31 +341,31 @@ cl_int sb_clSetKernelArg (cl_kernel kernel, cl_uint arg_index, size_t arg_size, 
   if (arg_error != CL_SUCCESS) {
     cerr << "ERROR clSetKernelArg: ";
     switch (arg_error) {
-      ERROR_CASE(CL_INVALID_KERNEL,
-		 "Kernel is not a valid kernel object.");
-      ERROR_CASE(CL_INVALID_ARG_INDEX,
-		 "arg_index is not a valid argument index.");
-      ERROR_CASE(CL_INVALID_ARG_VALUE,
-		 "arg_value specified is NULL for an argument that is not declared "
-		 "with the __local qualifier or vice-versa.");
-      ERROR_CASE(CL_INVALID_MEM_OBJECT,
-		 "An argument declared to be a memory object when the specified arg_value "
-		 "is not a valid memory object.");
-      ERROR_CASE(CL_INVALID_SAMPLER, 
-		 "An argument declared to be of type sampler_t when the specified arg_value "
-		 "is not a valid sampler object.");
-      ERROR_CASE(CL_INVALID_ARG_SIZE, "arg_size does not match the size of the data type for "
-		 "an argument that is not a memory object or if the argument is a memory "
-		 "object and arg_size != sizeof(cl_mem) or if arg_size is zero and the argument "
-		 "is declared with the __local qualifier or if the argument is a sampler and "
-		 "arg_size != sizeof(cl_sampler).");
-      ERROR_CASE(CL_OUT_OF_RESOURCES, 
-		 "There is a failure to allocate resources required by the OpenCL implementation "
-		 "on the device.");
-      ERROR_CASE(CL_OUT_OF_HOST_MEMORY,
-		 "There is a failure to allocate resources required by the OpenCL implementation "
-		 "on the host.");
-   default:
+      ERROR_CASE (CL_INVALID_KERNEL,
+		  "Kernel is not a valid kernel object.");
+      ERROR_CASE (CL_INVALID_ARG_INDEX,
+		  "arg_index is not a valid argument index.");
+      ERROR_CASE (CL_INVALID_ARG_VALUE,
+		  "arg_value specified is NULL for an argument that is not declared "
+		  "with the __local qualifier or vice-versa.");
+      ERROR_CASE (CL_INVALID_MEM_OBJECT,
+		  "An argument declared to be a memory object when the specified arg_value "
+		  "is not a valid memory object.");
+      ERROR_CASE (CL_INVALID_SAMPLER, 
+		  "An argument declared to be of type sampler_t when the specified arg_value "
+		  "is not a valid sampler object.");
+      ERROR_CASE (CL_INVALID_ARG_SIZE, "arg_size does not match the size of the data type for "
+		  "an argument that is not a memory object or if the argument is a memory "
+		  "object and arg_size != sizeof(cl_mem) or if arg_size is zero and the argument "
+		  "is declared with the __local qualifier or if the argument is a sampler and "
+		  "arg_size != sizeof(cl_sampler).");
+      ERROR_CASE (CL_OUT_OF_RESOURCES, 
+		  "There is a failure to allocate resources required by the OpenCL implementation "
+		  "on the device.");
+      ERROR_CASE (CL_OUT_OF_HOST_MEMORY,
+		  "There is a failure to allocate resources required by the OpenCL implementation "
+		  "on the host.");
+    default:
       cerr << "Unknown error" << endl;
       break;
     }

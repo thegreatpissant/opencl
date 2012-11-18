@@ -1,4 +1,4 @@
-EXECS="chp2_platforms chpter2 memtest"
+EXECS=chp2_platforms chpter2 memtest
 
 all: chp2_platforms memtest ch2
 

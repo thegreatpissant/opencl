@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstdlib>
 #include "sb_opencl.h"
 
 using std::cout;
@@ -75,9 +76,11 @@ int main ()
       clGetDeviceInfo (devices[i], CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE,
 			sizeof (var_width), &var_width, NULL);
       cout << "Preferred vector width in doubles:\t" << var_width << endl;
-      clGetDeviceInfo (devices[i], CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF,
+      #ifdef CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF
+	clGetDeviceInfo (devices[i], CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF,
 			sizeof (var_width), &var_width, NULL);
       cout << "Preferred vector width in halfs:\t" << var_width << endl;
+	#endif
     }
   }
 

@@ -1,6 +1,6 @@
 EXECS=chp2_platforms chpter2 memtest
 
-all: chp2_platforms memtest ch2
+all: chp2_platforms memtest ch2 varinfo
 
 
 sb_opencl.o: sb_opencl.h sb_opencl.cpp
@@ -14,6 +14,9 @@ ch2: chpter2.cpp
 
 memtest: memtest.cpp
 	g++ -o memtest memtest.cpp -I/usr/include/opencl-utils  -lOpenCL -g ./sb_opencl.o
+
+varinfo: varinfo.cpp
+	g++ -o varinfo varinfo.cpp -I/usr/include/opencl-utils  -lOpenCL -g
 
 clean: 
 	rm $(EXECS) *.o

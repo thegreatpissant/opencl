@@ -46,7 +46,8 @@ int main ()
   }
   cout << "Got " << num_platforms << " Platform" << (num_platforms > 1 ?"s" : "") << endl;
 
-  for (cl_uint i = 0; i < num_platforms; ++i) {
+  //  For all 
+  for (cl_uint i = 1; i < num_platforms; ++i) {
     cout << "Testing Platform #" << i << endl;
     cl_platform_id cur_platform = platforms[i];
     //    sb_clPrintPlatformInfo (&cur_platform);
@@ -204,6 +205,7 @@ int main ()
 	 cout << "All items matched" << endl;
        }
        
+       // Clean up objects
        clReleaseMemObject (ka);
        clReleaseMemObject (kb);
        clReleaseCommandQueue (command_queue);

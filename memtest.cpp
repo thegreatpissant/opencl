@@ -202,6 +202,7 @@ int main ()
 	 cout << "Not all matched" << endl;
        } else {
 	 cout << "All items matched" << endl;
+       }
        
        clReleaseMemObject (ka);
        clReleaseMemObject (kb);

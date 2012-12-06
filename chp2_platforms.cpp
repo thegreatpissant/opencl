@@ -191,7 +191,7 @@ int main ()
    */
   cl_int buffer_read_error;
 
-  if (sb_clEnqueueReadBuffer (command_queue, kc, CL_TRUE, 0, sizeof (cl_float), &c, 0, NULL, NULL) != CL_SUCCESS) {
+  if (sb_clEnqueueReadBuffer (command_queue, kc, CL_TRUE, 0, sizeof (c), &c, 0, NULL, NULL) != CL_SUCCESS) {
     cerr << "Failed to enque readbuffer for c." << endl;
   }
 
@@ -204,7 +204,11 @@ int main ()
   sb_clGetMemObjectInfo (kb);
   cout << "Mem object 3" << endl;
   sb_clGetMemObjectInfo (kc);
-  
+
+  clReleaseMemObject (ka);  
+  clReleaseMemObject (kb);  
+  clReleaseMemObject (kc);
+
   clReleaseCommandQueue (command_queue);
   clReleaseKernel  (kernel);
   clReleaseProgram (program);

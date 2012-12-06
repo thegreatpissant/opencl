@@ -1,3 +1,8 @@
+/*
+ * James A. Feister openjaf@gmail.com
+ * 
+ * future soapy brain games OpenCL Helper library
+ */ 
 #include <CL/cl.h>
 #include <iostream>
 #include <cstdlib>

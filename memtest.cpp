@@ -1,3 +1,12 @@
+/*
+ * James A. Feister openjaf@gmail.com
+ *
+ * This example creates an array of cl_float's initialized to 2.0f,
+ * sends them via opencl to the devices where the kernel multiplys it
+ * by two and assigns it to the other global array to return from the
+ * device memory to the host machine.
+ */
+
 #include <iostream>
 #include <cstdlib>
 #include <cstring>
@@ -46,11 +55,11 @@ int main ()
   }
   cout << "Got " << num_platforms << " Platform" << (num_platforms > 1 ?"s" : "") << endl;
 
-  //  For all 
-  for (cl_uint i = 1; i < num_platforms; ++i) {
-    cout << "Testing Platform #" << i << endl;
+  //  For all platforms found
+  for (cl_uint i = 0; i < num_platforms; ++i) {
+    cout << "Testing Platform #" << i+1 << endl;
     cl_platform_id cur_platform = platforms[i];
-    //    sb_clPrintPlatformInfo (&cur_platform);
+    sb_clPrintPlatformInfo (&cur_platform);
 
     /*
      *  Get Device count
@@ -76,11 +85,11 @@ int main ()
 	EXIT_FAIL;
       }
       cl_device_id cur_device = devices[0];
-      // sb_clPrintDeviceInfo (&cur_device);
+      sb_clPrintDeviceInfo (&cur_device);
       
       cl_ulong dev_mem_size;
-      //      clGetDeviceInfo (cur_device, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof (cl_ulong), &dev_mem_size, NULL);
-      //      cout << "Working with " << dev_mem_size << " bytes of memory." << endl;
+      clGetDeviceInfo (cur_device, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof (cl_ulong), &dev_mem_size, NULL);
+      cout << "Working with " << dev_mem_size << " bytes of memory." << endl;
 
 
       /*

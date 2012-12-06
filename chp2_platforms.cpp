@@ -1,3 +1,9 @@
+/*
+ * James A. Feister openjaf@gmail.com 
+ *
+ * Step by step for setting up an opencl application using the
+ * sb_opencl.h helper functions.
+ */
 #include <iostream>
 #include <cstdlib>
 #include <CL/cl.h>

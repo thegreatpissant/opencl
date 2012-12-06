@@ -1,3 +1,9 @@
+/*
+ * James A. Feister openjaf@gmail.com 
+ *
+ * Print out information on all platform's devices variable
+ * capabilities
+ */
 #include <iostream>
 #include <string>
 #include <cstdlib>

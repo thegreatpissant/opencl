@@ -132,8 +132,9 @@ int main ()
       cl_float a[NUM_ITEMS], b[NUM_ITEMS];
       cl_mem ka, kb;
       cl_int buffer_error;
+
       for (int i = 0; i < NUM_ITEMS; ++i)
-	a[i] = 2;
+	a[i] = 2.0f;
       ka = sb_clCreateBuffer (context, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR,
 			      sizeof (a), a);
       if (ka == NULL) {
@@ -163,17 +164,7 @@ int main ()
        /*
 	* Queue actions
 	*/
-       // queue kernel
        cl_event enqueue_event;
-       /*
-       cl_int err = clEnqueueTask (command_queue, kernel, 0, NULL, NULL);
-       if (err < 0) {
-	 EXIT_FAIL;
-	 } else {
-	 cout << "Kernel was enqueued" << endl;
-	 }
-
-	 /*/
        size_t work_items = NUM_ITEMS;
        size_t local_work[] = {1};
        size_t dim = 1;
@@ -195,12 +186,9 @@ int main ()
 	 cerr << "Failed to read buffer" << endl;
 	 EXIT_FAIL;
        }
-	 /*
-	   if (sb_clEnqueueReadBuffer (command_queue, kb, CL_TRUE, 0, sizeof (b), b, 0, NULL, NULL) != CL_SUCCESS) {
-	 cerr << "Failed to readback buffer from kernel" << endl;
-       }
-	 */
 
+       
+       //  Test the returned data is what its supposed to be.
        cl_bool match = true;
        for ( int i = 0; i < NUM_ITEMS; ++i) {
 	 if (4 != b[i] ) {
@@ -212,7 +200,8 @@ int main ()
        }
        if (!match) {
 	 cout << "Not all matched" << endl;
-       }
+       } else {
+	 cout << "All items matched" << endl;
        
        clReleaseMemObject (ka);
        clReleaseMemObject (kb);

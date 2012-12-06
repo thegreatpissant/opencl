@@ -1,4 +1,4 @@
-EXECS=chp2_platforms chpter2 memtest varinfo
+EXECS=chp2_platforms chpter2 memtest varinfo memtest2
 
 all: chp2_platforms memtest ch2 varinfo memtest2
 

@@ -204,11 +204,11 @@ int main ()
   cout << "C is now: " << c << endl;
   cout << "kc is now: " << kc << endl;
 
-  cout << "Mem object 1" << endl;
+  cout << "== Mem object 1 ==" << endl;
   sb_clGetMemObjectInfo (ka);
-  cout << "Mem object 2" << endl;
+  cout << "== Mem object 2 ==" << endl;
   sb_clGetMemObjectInfo (kb);
-  cout << "Mem object 3" << endl;
+  cout << "== Mem object 3 ==" << endl;
   sb_clGetMemObjectInfo (kc);
 
   clReleaseMemObject (ka);  

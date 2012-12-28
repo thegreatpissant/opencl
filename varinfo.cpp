@@ -60,7 +60,7 @@ int main ()
       EXIT_FAIL;
     }
 
-    cout << "Found " << num_devices << "device" << (num_devices > 1 ?"s":"") << "." << endl;
+    cout << "Found " << num_devices << " device" << (num_devices > 1 ?"s":"") << "." << endl;
     for (cl_uint i = 0; i < num_devices; ++i) {
       cout << "Preferred width's." << endl;
       cl_uint var_width;

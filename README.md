@@ -1,10 +1,10 @@
-opencl
+opencl notebook
 ======
 
-opencl notebook, my work on learning OpenCL.  This is an org file see http://orgmode.org
+My work on learning OpenCL.  This is an org file see http://orgmode.org
 
 * Source files include:
-- chp2_platforms.cpp: Step by Step example of using the sb_opencl.h OpenCL helper function.
+- chp2_platforms.cpp: Step by Step example of using the sb_opencl.h OpenCL helper functions.
 - memtest.cpp: Playing with passing memory between the host and devices.
 - memtest2.cpp: memtest without opencl, not really important
 - varinfo.cpp:  This will print some information about the width of the devices variables.

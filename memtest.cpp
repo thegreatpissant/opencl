@@ -121,10 +121,11 @@ int main ()
        * Get kernel from program
        */
       cl_kernel kernel;
-      if (NULL == (kernel = sb_clCreateKernel (program, "memcopy") ) ) {
+      char kernel_name[] = "memcopy";
+      if (NULL == (kernel = sb_clCreateKernel (program, kernel_name) ) ) {
 	EXIT_FAIL;
       } else {
-	cout << "Got kernel memcopy" << endl;
+	cout << "Got kernel " << kernel_name << endl;
       }
       
       /*

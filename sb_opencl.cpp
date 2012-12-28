@@ -137,7 +137,7 @@ int sb_clReadSourceProgramFromDisk ( char * file_name, string * program_buffer )
   fclose (file_handle);
   *program_buffer = buffer;
   delete (buffer);
-  cout << "Program: " << *program_buffer << endl;
+  //  cout << "Program: " << *program_buffer << endl;
   return program_buffer->size();
 }
 

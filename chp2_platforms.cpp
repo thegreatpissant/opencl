@@ -110,7 +110,9 @@ int main ()
   cl_program program;
   cl_int program_ret;
   
-  sb_clReadSourceProgramFromDisk ( fname, fbuffer);
+  if ( sb_clReadSourceProgramFromDisk ( fname, fbuffer) < 0 ) {
+    EXIT_FAIL;
+  }
   cout  << "Program read: " << *fbuffer << endl;
   program = sb_clCreateProgramFromSource ( fbuffer, context );
   if (program == NULL) {
@@ -125,11 +127,12 @@ int main ()
    * Step 5, Create kernels for functions
    */
   cl_kernel kernel;
+  char kernel_name[] = "good";
 
-  if ( NULL == (kernel = sb_clCreateKernel (program, "good")) ) {
+  if ( NULL == (kernel = sb_clCreateKernel (program, kernel_name)) ) {
     EXIT_FAILURE;
   } else {
-    cout << "Got kernel for function \'good\'." << endl;
+    cout << "Got kernel for function \'" << kernel_name << "\'" << endl;
   }
 
   /*

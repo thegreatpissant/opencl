@@ -102,14 +102,15 @@ int main (int argc, char * argv[] )
     cerr << "Failed to read buffer msg." << endl;
   }
 
-  cout << "message: " << msg << endl;
+  cout << "Message from kernel: " << msg << endl;
 
+  // CleanUP
   clReleaseMemObject (msg_buffer);
   clReleaseCommandQueue (command_queue);
   clReleaseKernel  (kernel);
   clReleaseProgram (program);
   clReleaseContext (context);
-  // CleanUP
+
   delete fbuffer;
   //  Generic section vars
   delete device;

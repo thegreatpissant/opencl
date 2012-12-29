@@ -779,3 +779,72 @@ void sb_clGetMemObjectInfo (cl_mem object)
 #endif
 
 }
+
+int sb_clGetContextWithDevice ( cl_platform_id ** platform, cl_context *context, cl_device_id ** device )
+{
+  cl_uint num_platforms;
+  cl_uint plafrom_id = 0;
+  cl_uint num_devices;
+  cl_uint device_id = 0;
+  cl_int context_error_ret;
+
+  /*
+   * Get platform
+   */
+  if (clGetPlatformIDs (1, NULL, &num_platforms) < 0 ) {
+    cerr << "Could not get number of platforms." << endl;
+    return 0;
+  }
+  
+  if ( num_platforms < 1 ) {
+    cerr << "Did not find possible platforms" << endl;
+    return 0;
+  } 
+    
+
+  *platform = new cl_platform_id;
+  if (*platform == NULL ) {
+    cerr << "Error allocating memory for platform." << endl;
+    return 0;
+  }
+  
+  if ( clGetPlatformIDs (1, *platform, NULL) < 0 ) {
+    cerr << "Error allocating platform." << endl;
+    return 0;
+  }
+
+  /*
+   * Get Device
+   */
+  if ( clGetDeviceIDs ( **platform, CL_DEVICE_TYPE_ALL, 0, NULL, &num_devices ) < 0 ) {
+    cerr << "Failed to query for platform devices." << endl;
+    return 0;
+  }
+
+  *device = new cl_device_id;
+
+  if (num_devices < 1) {
+    cerr << "Did not find any devices to use." << endl;
+    return 0;
+  }
+    
+  if ( clGetDeviceIDs (**platform, CL_DEVICE_TYPE_ALL,
+		       1, *device, NULL) < 0) {
+    cerr << "Failed to get requested device." << endl;
+    return 0;
+  }
+
+  /*
+   * Get context
+   */
+  *context = clCreateContext ( NULL,
+			      1, *device,
+			      NULL, NULL, &context_error_ret );
+  
+  if ( ! (*context != 0 && context_error_ret == CL_SUCCESS)) {
+    cerr << "Error creating a context." << endl;
+    return 0;
+  }
+  
+  return 1;
+}

@@ -28,7 +28,7 @@ int main (int argc, char * argv[] )
   cl_device_id * device;
   cl_context context;
 
-  if ( !sb_clGetContextWithDevice (&platform, &context, &device) ) {
+  if ( !sb_clGetContextWithDevice (&platform, &device, &context) ) {
       cerr << "Unable to get a device." << endl;
       EXIT_FAIL;
     }

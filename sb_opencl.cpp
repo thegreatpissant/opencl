@@ -780,7 +780,7 @@ void sb_clGetMemObjectInfo (cl_mem object)
 
 }
 
-int sb_clGetContextWithDevice ( cl_platform_id ** platform, cl_context *context, cl_device_id ** device )
+int sb_clGetContextWithDevice ( cl_platform_id ** platform, cl_device_id ** device, cl_context *context)
 {
   cl_uint num_platforms;
   cl_uint plafrom_id = 0;

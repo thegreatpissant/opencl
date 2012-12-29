@@ -59,5 +59,5 @@ cl_int sb_clGetImageInfo (cl_mem image);
 void sb_clGetMemObjectInfo (cl_mem object);
 
 /// Get a device, context, and platform from the first available. 
-int sb_clGetContextWithDevice ( cl_platform_id ** platform, cl_context *context, cl_device_id ** device );
+int sb_clGetContextWithDevice ( cl_platform_id ** platform, cl_device_id ** device, cl_context *context);
 #endif

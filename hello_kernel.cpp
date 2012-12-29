@@ -1,5 +1,5 @@
 /*
-n * James A. Feister openjaf@gmail.com
+ * James A. Feister openjaf@gmail.com
  *
  * "OpenCL in Action" populating vector data from a kernel.
  */

@@ -24,84 +24,14 @@ using std::endl;
 int main (int argc, char * argv[] )
 {
 
-  //  @@  GENERIC SECTION BEGIN  @@
-  cl_uint num_platforms;
-  cl_platform_id * platforms;
-  cl_uint plafrom_id = 0;
-  cl_uint num_devices;
-  cl_device_id * devices;
-  cl_uint device_id = 0;
+  cl_platform_id * platform;
+  cl_device_id * device;
   cl_context context;
-  cl_int context_error_ret;
 
-  /*
-   * Get platform
-   */
-  if (clGetPlatformIDs (1, NULL, &num_platforms) < 0 ) {
-    cerr << "Could not get number of platforms." << endl;
-    EXIT_FAIL;
-  }
-  
-  if ( num_platforms > 0 ) {
-    cout << "Found " << num_platforms << " platform" << (num_platforms > 1 ? "s" : "") << endl;
-  }
-  else {
-    cerr << "Did not find possible platforms" << endl;
-    EXIT_FAIL;
-  }
-
-  platforms = new cl_platform_id;
-  if (platforms == NULL ) {
-    cerr << "Error allocating memory for platform." << endl;
-    EXIT_FAIL;
-  }
-  
-  if ( clGetPlatformIDs (1, platforms, NULL) < 0 ) {
-    cerr << "Error allocating platform." << endl;
-    EXIT_FAIL;
-  }
-
-  sb_clPrintPlatformInfo (platforms);
-
-
-  /*
-   * Get Device
-   */
-  if ( clGetDeviceIDs ( *platforms, CL_DEVICE_TYPE_ALL, 0, NULL, &num_devices ) < 0 ) {
-    cerr << "Failed to query for platform devices." << endl;
-    EXIT_FAIL;
-  }
-
-  if (num_devices > 0) {
-    cout << "Found " << num_devices << " device" << (num_devices > 1 ? "s":"") << "." << endl;
-  } else {
-    cerr << "Did not find any devices to use." << endl;
-    EXIT_FAIL;
-  }
-
-  devices = new cl_device_id;
-  
-  if ( clGetDeviceIDs (*platforms, CL_DEVICE_TYPE_ALL,
-		       1, devices, NULL) < 0) {
-    cerr << "Failed to get requested device." << endl;
-    EXIT_FAIL;
-  }
-  sb_clPrintDeviceInfo ( devices );
-
-  /*
-   * Get context
-   */
-  context = clCreateContext ( NULL,
-			      1, devices,
-			      NULL, NULL, &context_error_ret );
-  
-  if ( ! (context != 0 && context_error_ret == CL_SUCCESS)) {
-    cerr << "Error creating a context." << endl;
-    EXIT_FAIL;
-  }
-  
-  //  @@  GENERIC SECTION END  @@ 
-
+  if ( !sb_clGetContextWithDevice (&platform, &context, &device) ) {
+      cerr << "Unable to get a device." << endl;
+      EXIT_FAIL;
+    }
   /*
    * Compile program
    */
@@ -119,7 +49,7 @@ int main (int argc, char * argv[] )
   if (program == NULL) {
     EXIT_FAIL;
   }
-  program_ret = sb_clBuildProgram (&program, 1, devices, NULL, NULL, NULL);
+  program_ret = sb_clBuildProgram (&program, 1, device, NULL, NULL, NULL);
   if ( program_ret < 0) {
     EXIT_FAIL;
   }
@@ -136,7 +66,7 @@ int main (int argc, char * argv[] )
 
   //  Get Command Queue
   cl_command_queue command_queue;
-  if ( (command_queue = sb_clCreateCommandQueue (context, *devices, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE)) == NULL ) {
+  if ( (command_queue = sb_clCreateCommandQueue (context, *device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE)) == NULL ) {
     EXIT_FAILURE;
   } else {
     cout << "Got command queue." << endl;
@@ -182,6 +112,6 @@ int main (int argc, char * argv[] )
   // CleanUP
   delete fbuffer;
   //  Generic section vars
-  delete devices;
-  delete platforms;
+  delete device;
+  delete platform;
 }

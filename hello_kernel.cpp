@@ -74,11 +74,12 @@ int main (int argc, char * argv[] )
 
   if (num_devices > 0) {
     cout << "Found " << num_devices << " device" << (num_devices > 1 ? "s":"") << "." << endl;
-    devices = new cl_device_id;
   } else {
     cerr << "Did not find any devices to use." << endl;
     EXIT_FAIL;
   }
+
+  devices = new cl_device_id;
   
   if ( clGetDeviceIDs (*platforms, CL_DEVICE_TYPE_ALL,
 		       1, devices, NULL) < 0) {

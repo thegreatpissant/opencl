@@ -87,6 +87,26 @@ int main ()
 			sizeof (var_width), &var_width, NULL);
       cout << "Preferred vector width in halfs:\t" << var_width << endl;
 	#endif
+      cl_device_fp_config flag;
+      cl_int err = clGetDeviceInfo (devices[i], CL_DEVICE_SINGLE_FP_CONFIG,
+		       sizeof (flag), &flag, NULL);
+      if (err < 0) {
+	cerr << "Couldn't read device information" << endl;
+	EXIT_FAIL;
+      }
+      cout << "Floating processing features: " << endl;
+      if (flag & CL_FP_INF_NAN)
+	cout << "INF and NaN values supported." << endl;
+      if (flag & CL_FP_DENORM)
+	cout << "Denormalized numbers supported." << endl;
+      if (flag & CL_FP_ROUND_TO_NEAREST)
+	cout << "Round to Nearest Even mode supported." << endl;
+      if (flag & CL_FP_ROUND_TO_INF)
+	cout << "Round to Infinity mode supported." << endl;
+      if (flag & CL_FP_ROUND_TO_ZERO)
+	cout << "Round to Zero mode supported." << endl;
+      if (flag & CL_FP_FMA)
+	cout << "Floating-point multiply-and-add operation supported" << endl;
     }
   }
 

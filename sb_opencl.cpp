@@ -96,14 +96,19 @@ void sb_clPrintDeviceInfo ( cl_device_id * device )
  
   clGetDeviceInfo ( *device, CL_DEVICE_TYPE, sizeof (cl_device_type), &qdevice_type, NULL);
   cout << "Device type is: ";
-  if (qdevice_type & CL_DEVICE_TYPE_CPU)
-    cout << "CPU" << endl;
-  if (qdevice_type & CL_DEVICE_TYPE_GPU)
-    cout << "GPU" << endl;
-  if (qdevice_type & CL_DEVICE_TYPE_ACCELERATOR)
-    cout << "ACCELERATOR" << endl;
-  if (qdevice_type & CL_DEVICE_TYPE_DEFAULT)
-    cout << "DEFAULT" << endl;
+  switch (qdevice_type) {
+    INFO_CASE ( CL_DEVICE_TYPE_CPU,
+		"CPU" );
+    INFO_CASE ( CL_DEVICE_TYPE_GPU,
+		"GPU" );
+    INFO_CASE ( CL_DEVICE_TYPE_ACCELERATOR,
+		"ACCELERATOR" );
+    INFO_CASE ( CL_DEVICE_TYPE_DEFAULT,
+		"DEFAULT" );
+  default: 
+    cout << "Unknow device" << endl;
+    break;
+  }
  
   clGetDeviceInfo ( *device, CL_DEVICE_EXTENSIONS, qstring_len, qstring, NULL);
   cout << "Device Extensions: " << qstring << endl;
@@ -171,18 +176,23 @@ void sb_clPrintDeviceInfo ( cl_device_id * device )
   clGetDeviceInfo (*device, CL_DEVICE_SINGLE_FP_CONFIG,
 		   sizeof (flag), &flag, NULL);
   cout << "Device Floating processing features: " << endl;
-  if (flag & CL_FP_INF_NAN)
-    cout << "\tINF and NaN values supported." << endl;
-  if (flag & CL_FP_DENORM)
-    cout << "\tDenormalized numbers supported." << endl;
-  if (flag & CL_FP_ROUND_TO_NEAREST)
-    cout << "\tRound to Nearest Even mode supported." << endl;
-  if (flag & CL_FP_ROUND_TO_INF)
-    cout << "\tRound to Infinity mode supported." << endl;
-  if (flag & CL_FP_ROUND_TO_ZERO)
-    cout << "\tRound to Zero mode supported." << endl;
-  if (flag & CL_FP_FMA)
-    cout << "\tFloating-point multiply-and-add operation supported" << endl;
+  switch (flag) {
+    INFO_CASE ( CL_FP_INF_NAN,
+		"\tINF and NaN values supported.");
+    INFO_CASE ( CL_FP_DENORM,
+		"\tDenormalized numbers supported.");
+    INFO_CASE ( CL_FP_ROUND_TO_NEAREST,
+		"\tRound to Nearest Even mode supported." );
+    INFO_CASE ( CL_FP_ROUND_TO_INF,
+		"\tRound to Infinity mode supported." );
+    INFO_CASE ( CL_FP_ROUND_TO_ZERO,
+		"\tRound to Zero mode supported." );
+    INFO_CASE ( CL_FP_FMA,
+		"\tFloating-point multiply-and-add operation supported" );
+  default: 
+    cout << "Unknown floating point processing feature" << endl;
+    break;
+  }
 }
 
 int sb_clReadSourceProgramFromDisk ( char * file_name, string * program_buffer )
@@ -286,11 +296,22 @@ cl_int sb_clBuildProgram ( cl_program * program,
   if (program_ret != CL_SUCCESS) {
     size_t build_param_size;
     char * build_param_value;
-
-    clGetProgramBuildInfo (*program, devices[0],
+    cl_int build_ret = clGetProgramBuildInfo (*program, devices[0],
 			   CL_PROGRAM_BUILD_LOG,
 			   1, NULL,
 			   &build_param_size);
+    switch (build_ret) {
+      ERROR_CASE (CL_INVALID_DEVICE,
+		  "Getting Build info failed: Invalid Device");
+      ERROR_CASE (CL_INVALID_VALUE,
+		  "Getting Build info failed: Invalid Value");
+      ERROR_CASE (CL_INVALID_PROGRAM,
+		  "Getting Build info failed: Invalid Program");
+      ERROR_CASE ( CL_OUT_OF_RESOURCES,
+		   "Getting Build info failed: OUT OF RESOURCES");
+      ERROR_CASE ( CL_OUT_OF_HOST_MEMORY,
+		   "Getting Build info failed: OUT OF HOST MEMORY");
+    }
     build_param_value = (char *) malloc (sizeof (char)*(build_param_size+1));
     build_param_value[build_param_size] = '\0';
     cl_int build_status = clGetProgramBuildInfo (*program, devices[0],

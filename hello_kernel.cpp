@@ -59,7 +59,7 @@ int main (int argc, char * argv[] )
   char kernel_name[] = "hello_kernel";
 
   if ( (kernel = sb_clCreateKernel (program, kernel_name)) == NULL ) {
-    EXIT_FAILURE;
+    EXIT_FAIL;
   } else {
     cout << "Kernelized function \'" << kernel_name << "\'" << endl;
   }
@@ -67,7 +67,7 @@ int main (int argc, char * argv[] )
   //  Get Command Queue
   cl_command_queue command_queue;
   if ( (command_queue = sb_clCreateCommandQueue (context, *device, CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE)) == NULL ) {
-    EXIT_FAILURE;
+    EXIT_FAIL;
   } else {
     cout << "Got command queue." << endl;
   }
@@ -89,13 +89,15 @@ int main (int argc, char * argv[] )
   }
 
   //  Enqueue Kernel
+  cl_event msg_event;
   cl_int task_error;
-  if (sb_clEnqueueTask (command_queue, kernel, 0, NULL, NULL) != CL_SUCCESS ) {
+  if (sb_clEnqueueTask (command_queue, kernel, 0, NULL, &msg_event) != CL_SUCCESS ) {
     EXIT_FAIL;
   } else {
     cout << "Kernel was enqueued" << endl;
   }
 
+  clWaitForEvents (1, &msg_event);
   //  Read the data
   cl_int buffer_read_error;
   if (sb_clEnqueueReadBuffer (command_queue, msg_buffer, CL_TRUE, 0, sizeof (msg), &msg, 0, NULL, NULL) != CL_SUCCESS) {

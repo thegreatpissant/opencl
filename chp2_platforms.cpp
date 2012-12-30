@@ -119,7 +119,7 @@ int main ()
     EXIT_FAIL;
   }
   program_ret = sb_clBuildProgram (&program, 1, devices, NULL, NULL, NULL);
-  if (program_ret < 0) {
+  if (program_ret <= 0) {
     EXIT_FAIL;
   }
 
@@ -199,11 +199,13 @@ int main ()
    *  Step 9, Read back our data
    */
   cl_int buffer_read_error;
+  cl_event read_event;
 
-  if (sb_clEnqueueReadBuffer (command_queue, kc, CL_TRUE, 0, sizeof (c), &c, 0, NULL, NULL) != CL_SUCCESS) {
+  if (sb_clEnqueueReadBuffer (command_queue, kc, CL_TRUE, 0, sizeof (c), &c, 0, NULL, &read_event) != CL_SUCCESS) {
     cerr << "Failed to enque readbuffer for c." << endl;
   }
 
+  clWaitForEvents (1, &read_event);
   cout << "C is now: " << c << endl;
   cout << "kc is now: " << kc << endl;
 

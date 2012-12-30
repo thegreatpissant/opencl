@@ -73,46 +73,116 @@ void sb_clPrintPlatformExtension ( cl_platform_id * platform, cl_int extension )
 
 void sb_clPrintDeviceInfo ( cl_device_id * device )
 {
-  /*
-    CL_DEVICE_VENDOR             | char[]
-    CL_DEVICE_NAME               | char[]
-    CL_DEVICE_EXTENSIONS         | char[]
-    CL_DEVICE_GLOBAL_MEM_SIZE    | cl_ulong
-    CL_DEVICE_ADDRESS_BITS       | cl_uint
-    CL_DEVICE_AVAILABLE          | cl_bool
-    CL_DEVICE_COMPILER_AVAILABLE | cl_bool
-  */
-
   size_t   qstring_len = 2048;
-  cl_ulong qmemory_size = 0;
-  cl_uint  qaddress_space = 0;
-  cl_bool  qdevice_available = false;
-  cl_bool  qdevice_compiler  = false;
   cl_char *qstring = (cl_char *) malloc (qstring_len+1);
-
+  cl_device_type qdevice_type;
+  size_t qsize_t;
+  cl_uint qcl_uint;
+  cl_ulong qcl_ulong;
+  cl_bool qcl_bool;
   qstring[qstring_len] = '\0';
 
   clGetDeviceInfo ( *device, CL_DEVICE_VENDOR, qstring_len, qstring, NULL);
-  cout << "Vendor Name: " << qstring << endl;
+  cout << "Device Vendor Name: " << qstring << endl;
 
   clGetDeviceInfo ( *device, CL_DEVICE_NAME, qstring_len, qstring, NULL);
-  cout << "Vendor Device Name: " <<  qstring << endl;
+  cout << "Device Name: " <<  qstring << endl;
 
+  clGetDeviceInfo ( *device, CL_DEVICE_OPENCL_C_VERSION, qstring_len, qstring, NULL);
+  cout << "Device OpenCL C version: " <<  qstring << endl;
+
+  clGetDeviceInfo ( *device, CL_DRIVER_VERSION, qstring_len, qstring, NULL);
+  cout << "Device OpenCL Driver version: " <<  qstring << endl;
+ 
+  clGetDeviceInfo ( *device, CL_DEVICE_TYPE, sizeof (cl_device_type), &qdevice_type, NULL);
+  cout << "Device type is: ";
+  if (qdevice_type & CL_DEVICE_TYPE_CPU)
+    cout << "CPU" << endl;
+  if (qdevice_type & CL_DEVICE_TYPE_GPU)
+    cout << "GPU" << endl;
+  if (qdevice_type & CL_DEVICE_TYPE_ACCELERATOR)
+    cout << "ACCELERATOR" << endl;
+  if (qdevice_type & CL_DEVICE_TYPE_DEFAULT)
+    cout << "DEFAULT" << endl;
+ 
   clGetDeviceInfo ( *device, CL_DEVICE_EXTENSIONS, qstring_len, qstring, NULL);
   cout << "Device Extensions: " << qstring << endl;
 
-  clGetDeviceInfo ( *device, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof (cl_ulong), &qmemory_size, NULL);
-  cout << "Device Address Space Size: " << qmemory_size << endl;
+  clGetDeviceInfo ( *device, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof (cl_uint), &qcl_uint, NULL);
+  cout << "Device max compute units: " << qcl_uint << endl;
 
-  clGetDeviceInfo ( *device, CL_DEVICE_ADDRESS_BITS, sizeof (cl_uint), &qaddress_space, NULL);
-  cout << "Device Address Bits: " << qaddress_space << endl;
+  clGetDeviceInfo ( *device, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS, sizeof (cl_uint), &qcl_uint, NULL);
+  cout << "Device max work item dimensions: " << qcl_uint << endl;
 
-  clGetDeviceInfo ( *device, CL_DEVICE_AVAILABLE, sizeof (cl_bool), &qdevice_available, NULL);
-  cout << "Device Available: " << (qdevice_available ? "TRUE":"FALSE" ) << endl;
+  clGetDeviceInfo ( *device, CL_DEVICE_MAX_WORK_GROUP_SIZE, sizeof (size_t), &qsize_t, NULL);
+  cout << "Device max work group size: " << qsize_t << endl;
 
-  clGetDeviceInfo ( *device, CL_DEVICE_COMPILER_AVAILABLE, sizeof (cl_bool), &qdevice_compiler, NULL);
-  cout << "Device Compiler: " << (qdevice_compiler ? "TRUE":"FALSE") << endl;
+  clGetDeviceInfo ( *device, CL_DEVICE_MAX_WORK_ITEM_SIZES, sizeof (cl_uint), &qcl_uint, NULL);
+  cout << "Device max work item sizes: " << qcl_uint << endl;
 
+  clGetDeviceInfo ( *device, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof (cl_ulong), &qcl_ulong, NULL);
+  cout << "Device Global Memory Size: " << qcl_ulong << endl;
+
+  clGetDeviceInfo ( *device, CL_DEVICE_GLOBAL_MEM_CACHE_SIZE, sizeof (cl_ulong), &qcl_ulong, NULL);
+  cout << "Device Global Memory Cache Size: " << qcl_ulong << endl;
+  
+  clGetDeviceInfo ( *device, CL_DEVICE_MAX_CONSTANT_BUFFER_SIZE, sizeof (cl_ulong), &qcl_ulong, NULL);
+  cout << "Device Max Constant Buffer Size: " << qcl_ulong << endl;
+  
+  clGetDeviceInfo ( *device, CL_DEVICE_LOCAL_MEM_SIZE, sizeof (cl_ulong), &qcl_ulong, NULL);
+  cout << "Device Local Memory Size: " << qcl_ulong << endl;
+
+  clGetDeviceInfo ( *device, CL_DEVICE_ADDRESS_BITS, sizeof (cl_uint), &qcl_uint, NULL);
+  cout << "Device Address Bits: " << qcl_uint << endl;
+
+  clGetDeviceInfo ( *device, CL_DEVICE_AVAILABLE, sizeof (cl_bool), &qcl_bool, NULL);
+  cout << "Device Available: " << (qcl_bool ? "TRUE":"FALSE" ) << endl;
+
+  clGetDeviceInfo ( *device, CL_DEVICE_COMPILER_AVAILABLE, sizeof (cl_bool), &qcl_bool, NULL);
+  cout << "Device Compiler: " << (qcl_bool ? "TRUE":"FALSE") << endl;
+
+  
+  cout << "Preferred Vector width's." << endl;
+  clGetDeviceInfo (*device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_CHAR,
+		   sizeof (cl_uint), &qcl_uint, NULL);
+  cout << "\tIn chars: " << qcl_uint << endl;
+  clGetDeviceInfo (*device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_SHORT,
+		   sizeof (cl_uint), &qcl_uint, NULL);
+  cout << "\tIn shorts: " << qcl_uint << endl;
+  clGetDeviceInfo (*device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_INT,
+		   sizeof (cl_uint), &qcl_uint, NULL);
+  cout << "\tIn ints: " << qcl_uint << endl;
+  clGetDeviceInfo (*device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_LONG,
+		   sizeof (cl_uint), &qcl_uint, NULL);
+  cout << "\tIn longs: " << qcl_uint << endl;
+  clGetDeviceInfo (*device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_FLOAT,
+		   sizeof (cl_uint), &qcl_uint, NULL);
+  cout << "\tIn floats: " << qcl_uint << endl;
+  clGetDeviceInfo (*device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_DOUBLE,
+		   sizeof (cl_uint), &qcl_uint, NULL);
+  cout << "\tIn doubles: " << qcl_uint << endl;
+
+#ifdef CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF
+  clGetDeviceInfo (*device, CL_DEVICE_PREFERRED_VECTOR_WIDTH_HALF,
+    sizeof (cl_uint), &qcl_uint, NULL);
+  cout << "\tIn halfs: " << qcl_uint << endl;
+#endif
+  cl_device_fp_config flag;
+  clGetDeviceInfo (*device, CL_DEVICE_SINGLE_FP_CONFIG,
+		   sizeof (flag), &flag, NULL);
+  cout << "Device Floating processing features: " << endl;
+  if (flag & CL_FP_INF_NAN)
+    cout << "\tINF and NaN values supported." << endl;
+  if (flag & CL_FP_DENORM)
+    cout << "\tDenormalized numbers supported." << endl;
+  if (flag & CL_FP_ROUND_TO_NEAREST)
+    cout << "\tRound to Nearest Even mode supported." << endl;
+  if (flag & CL_FP_ROUND_TO_INF)
+    cout << "\tRound to Infinity mode supported." << endl;
+  if (flag & CL_FP_ROUND_TO_ZERO)
+    cout << "\tRound to Zero mode supported." << endl;
+  if (flag & CL_FP_FMA)
+    cout << "\tFloating-point multiply-and-add operation supported" << endl;
 }
 
 int sb_clReadSourceProgramFromDisk ( char * file_name, string * program_buffer )

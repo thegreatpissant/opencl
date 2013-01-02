@@ -14,7 +14,7 @@ memtest: memtest.cpp sb_opencl.o
 memtest2: memtest2.cpp
 	$(CXX) -o memtest2 memtest2.cpp 
 
-varinfo: varinfo.cpp
+varinfo: varinfo.cpp sb_opencl.o
 	$(CXX) -o varinfo varinfo.cpp -I/usr/include/opencl-utils  -lOpenCL ./sb_opencl.o -g
 
 hello_kernel: hello_kernel.cpp sb_opencl.o

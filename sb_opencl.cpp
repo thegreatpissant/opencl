@@ -113,6 +113,9 @@ void sb_clPrintDeviceInfo ( cl_device_id * device )
   clGetDeviceInfo ( *device, CL_DEVICE_EXTENSIONS, qstring_len, qstring, NULL);
   cout << "Device Extensions: " << qstring << endl;
 
+  clGetDeviceInfo ( *device, CL_DEVICE_IMAGE_SUPPORT, sizeof (cl_bool), &qcl_bool, NULL);
+  cout << "Device supports images: " << (qcl_bool ? "TRUE":"FALSE") << endl;
+
   clGetDeviceInfo ( *device, CL_DEVICE_MAX_COMPUTE_UNITS, sizeof (cl_uint), &qcl_uint, NULL);
   cout << "Device max compute units: " << qcl_uint << endl;
 

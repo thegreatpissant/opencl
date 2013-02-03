@@ -704,6 +704,8 @@ cl_int sb_clGetImageInfo (cl_mem image)
     sb_print_clGetInfoError (info_ret);
   else
     cout << "Depth of image in pixels: " << element_size << endl;
+  
+  return info_ret;
 
 }
 

@@ -139,7 +139,7 @@ int main ()
       }
 
       // Create data to send over
-      #define NUM_ITEMS 10000
+      #define NUM_ITEMS 1024
       cl_float a[NUM_ITEMS], b[NUM_ITEMS];
       cl_mem ka, kb;
       cl_int buffer_error;
@@ -176,19 +176,18 @@ int main ()
 	* Queue actions
 	*/
        cl_event enqueue_event;
-       size_t work_items = NUM_ITEMS;
-       size_t local_work[] = {1};
-       size_t dim = 1;
+       size_t work_items[] = {2, NUM_ITEMS/2};
+       size_t dim = 2;
+       cout << "Waiting for kernel to complete ... ";
        if (CL_SUCCESS != clEnqueueNDRangeKernel (command_queue, kernel, 
 						 dim, NULL,   // work_dim, global_work_offset
-						 &work_items, // global_work_size
+						 work_items, // global_work_size
 						 NULL,  // local_work_size
 						 0, NULL, NULL) // num_wait_event, events, event
 	   ) {
 	 cerr << "Failed to enqueue kernel" << endl;
 	 EXIT_FAIL;
        }
-       cout << "Waiting for kernel to complete ... ";
        clFinish(command_queue);
        cout << "done." << endl;
        // read back data

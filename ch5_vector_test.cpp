@@ -40,7 +40,7 @@ int main (int argc, char * argv[])
   cl_program program;
   cl_int program_ret;
   
-  if ( (program_size = sb_clReadSourceProgramFromDisk ( fname, fbuffer ) ) < 0 ) {
+  if ( (program_size = sb_clReadSourceProgramFromDisk ( fname, fbuffer ) ) == 0 ) {
     EXIT_FAIL;
   }
   program = sb_clCreateProgramFromSource ( fbuffer, context );

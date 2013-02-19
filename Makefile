@@ -3,11 +3,11 @@ CC=clang
 LIBS=-lOpenCL
 STD=-std=c++11
 OPT=-O3
-# DEBUG=-g
+DEBUG=-g
 
-EXECS=chp2_platforms memtest varinfo memtest2 hello_kernel ch5_vector_test chpt8_oo
+EXECS=chp2_platforms memtest varinfo memtest2 hello_kernel ch5_vector_test chpt8_oo memtest3 getKernels getContext getDeviceInfo ch4-4-3 ch5-1
 
-all: sb_opencl.o chp2_platforms memtest memtest2 varinfo hello_kernel ch5_vector_test chpt8_oo
+all: sb_opencl.o chp2_platforms memtest memtest2 varinfo hello_kernel ch5_vector_test chpt8_oo memtest3 getKernels getContext getDeviceInfo ch4-4-3 ch5-1
 
 sb_opencl.o: sb_opencl.h sb_opencl.cpp
 	$(CXX) -c sb_opencl.cpp $(STD) $(OPT) $(DEBUG)
@@ -32,6 +32,27 @@ ch5_vector_test: ch5_vector_test.cpp sb_opencl.o
 
 chpt8_oo: chpt8_oo.cpp 
 	$(CXX) -std=c++11 -o chpt8_oo chpt8_oo.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+
+memtest3: memtest3.cpp 
+	$(CXX) -std=c++11 -o memtest3 memtest3.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+
+getInfoCpp: getinfo.cpp 
+	$(CXX) -std=c++11 -o getInfoCpp getinfo.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+
+getDeviceInfo: getDeviceInfo.cpp 
+	$(CXX) -std=c++11 -o getDeviceInfo getDeviceInfo.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+
+getContext: getContext.cpp 
+	$(CXX) -std=c++11 -o getContext getContext.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+
+getKernels: getKernels.cpp 
+	$(CXX) -std=c++11 -o getKernels getKernels.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+
+ch4-4-3: ch4-4-3.cpp 
+	$(CXX) -std=c++11 -o ch4-4-3 ch4-4-3.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+
+ch5-1: ch5-1.cpp 
+	$(CXX) -std=c++11 -o ch5-1 ch5-1.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
 
 clean: 
 	rm $(EXECS) *.o

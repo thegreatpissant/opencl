@@ -17,12 +17,23 @@ int main ()
     cl::Platform::get(&platforms);
     platforms[0].getDevices (CL_DEVICE_TYPE_ALL, &platformDevices);
 
+    cout << "Platform extensions: "
+         << platforms[0].getInfo <CL_PLATFORM_EXTENSIONS> ()
+         << endl;
     cl::Context context (platformDevices);
     ctxDevices = context.getInfo <CL_CONTEXT_DEVICES> ();
-    for (cl_uint i = 0; i < ctxDevices.size(); i++) { 
-      cout << "Device: " 
-           << ctxDevices[i].getInfo <CL_DEVICE_NAME>()
+
+    for (auto device : ctxDevices) {
+      cout << "Device Name: " 
+           << device.getInfo <CL_DEVICE_NAME>()
            << endl;
+      cout << "Device Extensions: "
+           << device.getInfo <CL_DEVICE_EXTENSIONS>()
+           << endl;
+      /*      cout << "Device C Version: "
+           << device.getInfo <CL_DEVICE_OPENCL_C_VERSION>()
+           << endl;
+      */
     }
   }
   catch (cl::Error e) {
@@ -30,5 +41,6 @@ int main ()
          << e.err () << endl;
   }
 
+  ctxDevices.erase(ctxDevices.begin(), ctxDevices.end());
   return 0;
 }

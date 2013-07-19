@@ -31,28 +31,28 @@ ch5_vector_test: ch5_vector_test.cpp sb_opencl.o
 	$(CXX) -o ch5_vector_test ch5_vector_test.cpp $(LIBS) $(STD) $(OPT) $(DEBUG) ./sb_opencl.o 
 
 chpt8_oo: chpt8_oo.cpp 
-	$(CXX) -std=c++11 -o chpt8_oo chpt8_oo.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+	$(CXX) -o chpt8_oo chpt8_oo.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
 
 memtest3: memtest3.cpp 
-	$(CXX) -std=c++11 -o memtest3 memtest3.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+	$(CXX) -o memtest3 memtest3.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
 
-getInfoCpp: getinfo.cpp 
-	$(CXX) -std=c++11 -o getInfoCpp getinfo.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+getInfoCpp: getinfo.cpp sb_opencl.o
+	$(CXX) -o getInfoCpp getinfo.cpp $(LIBS) $(STD) $(OPT) $(DEBUG) ./sb_opencl.o
 
 getDeviceInfo: getDeviceInfo.cpp 
-	$(CXX) -std=c++11 -o getDeviceInfo getDeviceInfo.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+	$(CXX) -o getDeviceInfo getDeviceInfo.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
 
 getContext: getContext.cpp 
-	$(CXX) -std=c++11 -o getContext getContext.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+	$(CXX) -o getContext getContext.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
 
 getKernels: getKernels.cpp 
-	$(CXX) -std=c++11 -o getKernels getKernels.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+	$(CXX) -o getKernels getKernels.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
 
 ch4-4-3: ch4-4-3.cpp 
-	$(CXX) -std=c++11 -o ch4-4-3 ch4-4-3.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+	$(CXX) -o ch4-4-3 ch4-4-3.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
 
 ch5-1: ch5-1.cpp 
-	$(CXX) -std=c++11 -o ch5-1 ch5-1.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
+	$(CXX) -o ch5-1 ch5-1.cpp $(LIBS) $(STD) $(OPT) $(DEBUG)
 
 clean: 
 	rm $(EXECS) *.o

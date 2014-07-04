@@ -5,9 +5,9 @@ STD=-std=c++11
 OPT=-O3
 DEBUG=-g
 
-EXECS=chp2_platforms memtest varinfo memtest2 hello_kernel ch5_vector_test chpt8_oo memtest3 getKernels getContext getDeviceInfo ch4-4-3 ch5-1
+EXECS=chp2_platforms memtest varinfo memtest2 hello_kernel ch5_vector_test chpt8_oo memtest3 getKernels getContext getDeviceInfo getInfoCpp ch4-4-3 ch5-1
 
-all: sb_opencl.o chp2_platforms memtest memtest2 varinfo hello_kernel ch5_vector_test chpt8_oo memtest3 getKernels getContext getDeviceInfo ch4-4-3 ch5-1
+all: sb_opencl.o chp2_platforms memtest memtest2 varinfo hello_kernel ch5_vector_test chpt8_oo memtest3 getKernels getContext getDeviceInfo getInfoCpp ch4-4-3 ch5-1
 
 sb_opencl.o: sb_opencl.h sb_opencl.cpp
 	$(CXX) -c sb_opencl.cpp $(STD) $(OPT) $(DEBUG)

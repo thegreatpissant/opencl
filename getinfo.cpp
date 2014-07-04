@@ -51,8 +51,8 @@ int main () {
 
  void sb_print_cl_image_format (cl_image_format *image_format) 
 {
-  cout << "Image format " << endl;
-  cout << "channel_order ";
+  cout << "\nImage format" << endl;
+  cout << "\tchannel_order ";
   switch (image_format->image_channel_order) {
   case CL_R:
   case CL_Rx:
@@ -82,11 +82,12 @@ int main () {
     cout << "CL_ARGB, CL_BRGA" << endl;
     break;
   default:
+    cout << "Unknown Image Format" << endl;
     break;
   }
 
   //  cout << "size of channel data type" << endl;
-
+  cout << "\tData type:";
   switch (image_format->image_channel_data_type) {
     INFO_CASE (CL_SNORM_INT8,
 	       "CL_SNORM_INT8, Each channel component is a normalized signed 8-bit integer value.");
